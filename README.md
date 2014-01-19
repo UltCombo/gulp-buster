@@ -1,4 +1,4 @@
-# [gulp](https://github.com/gulpjs/gulp/)-buster
+# [gulp](https://github.com/gulpjs/gulp/)-buster [![Build Status](https://travis-ci.org/UltCombo/gulp-buster.png?branch=master)](https://travis-ci.org/UltCombo/gulp-buster)
 
 Cache buster hashes generator for gulp
 
