@@ -16,7 +16,7 @@ Then install gulp-buster as a development dependency:
 npm install --save-dev gulp-buster
 ```
 
-## Using
+## How to use
 
 gulp-buster can be used standalone as part of a build task, or in conjunction with [`gulp-watch`](https://npmjs.org/package/gulp-watch) to update the cache buster hashes as the files are modified.
 
@@ -77,7 +77,7 @@ res.render('view', { fooSrc: '/' + asset('js/min/foo.min.js') }, function(err, h
 });
 ```
 
-As you can see, the gulp-buster `busters.json`'s paths are relative to project root without the leading slash, so we manually prepend a `/` to the cache-busted URL. This works nicely if your project root corresponds to the web server root. Otherwise, you will have to prepend the correct base URL - the optimal way would be to dynamically retrieve your app's base URL, specially if your local development server and production server's directory path differs (e.g. it is a common scenario to have production server run at `/` while local development server at `/myProject/`).
+As you can see, the gulp-buster `busters.json`'s paths are relative to project root without the leading slash, so we manually prepend a `/` to the cache-busted URL. This works nicely if your project root corresponds to the web server root. Otherwise, you will have to prepend the correct base URL. The optimal way would be to dynamically retrieve your app's base URL, specially as the project path relative to the web server root may differ between production and local development environments (e.g. it is a common scenario to have the project run at `/` in the production server and at `/myProject/` in local development).
 
 There are many ways to implement this in the front-end as well. If using an AMD loader such as Require.js, you can map modules to cache-busted URLs in the config. Even without any loader, it is possible to `document.write` the scripts as follows:
 
