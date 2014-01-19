@@ -1,0 +1,34 @@
+{
+  "name": "gulp-buster",
+  "description": "Cache buster hashes generator for gulp",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ult Combo",
+    "email": "ultcombo@gmail.com"
+  },
+  "main": "./index.js",
+  "keywords": [
+    "gulpplugin",
+    "cachebuster",
+    "cache buster"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UltCombo/gulp-buster.git"
+  },
+  "dependencies": {
+    "event-stream": "~3.1.0",
+    "gulp-util": "~2.2.12"
+  },
+  "engines": {
+    "node": ">= 0.9"
+  },
+  "license": "WTFPL",
+  "devDependencies": {
+    "should": "~3.0.1",
+    "mocha": "~1.17.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  }
+}
