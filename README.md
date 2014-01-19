@@ -1,4 +1,8 @@
-# [gulp](https://github.com/gulpjs/gulp/)-buster [![Build Status](https://travis-ci.org/UltCombo/gulp-buster.png?branch=master)](https://travis-ci.org/UltCombo/gulp-buster)
+# [gulp](https://github.com/gulpjs/gulp/)-buster
+[![NPM version](https://badge.fury.io/js/gulp-buster.png)](https://npmjs.org/package/gulp-buster)
+[![Build Status](https://travis-ci.org/UltCombo/gulp-buster.png?branch=master)](https://travis-ci.org/UltCombo/gulp-buster)
+[![Dependency Status](https://david-dm.org/UltCombo/gulp-buster.png)](https://david-dm.org/UltCombo/gulp-buster)
+[![devDependency Status](https://david-dm.org/UltCombo/gulp-buster/dev-status.png)](https://david-dm.org/UltCombo/gulp-buster#info=devDependencies)
 
 Cache buster hashes generator for gulp
 
