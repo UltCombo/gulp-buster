@@ -52,7 +52,7 @@ var bust = require('gulp-buster');
 
 // accepts an object as setter
 bust.config({
-	hash: 'sha1',
+	algo: 'sha1',
 	length: 6
 });
 
@@ -63,7 +63,7 @@ bust.config('length', 8);
 var lengthLimit = bust.config('length'); // 8
 
 // pass no arguments to retrieve the current configs object
-var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 8 [, ...] }
+var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length: 8 [, ...] }
 // NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
 // to edit the plugin's configs by assigning to this object's properties.
 ```
