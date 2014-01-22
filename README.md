@@ -56,16 +56,16 @@ bust.config({
 	length: 6
 });
 
-// pass no arguments to retrieve the current configs object
-var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 6 [, ...] }
-// NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
-// to edit the plugin's configs by assigning to this object's properties.
-
 // pass two arguments to set the value for a single config
 bust.config('length', 8);
 
 // and of course, pass a single string to retrieve the given config's value
 var lengthLimit = bust.config('length'); // 8
+
+// pass no arguments to retrieve the current configs object
+var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 6 [, ...] }
+// NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
+// to edit the plugin's configs by assigning to this object's properties.
 ```
 
 ### Available configurations
@@ -84,7 +84,7 @@ gulp-buster is language-agnostic, thus this part relies on you and your specific
 
 ```js
 {
-	"path/to/file/relative/to/project/root/filename.ext": "File's MD5 hash",
+	"path/to/file/relative/to/project/root/filename.ext": "hash",
 	//other entries
 }
 ```
