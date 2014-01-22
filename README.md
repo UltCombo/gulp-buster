@@ -63,7 +63,7 @@ bust.config('length', 8);
 var lengthLimit = bust.config('length'); // 8
 
 // pass no arguments to retrieve the current configs object
-var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 6 [, ...] }
+var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 8 [, ...] }
 // NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
 // to edit the plugin's configs by assigning to this object's properties.
 ```
