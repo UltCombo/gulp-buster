@@ -41,7 +41,42 @@ gulp.task('default', function() {
 
 ## Parameters
 
-`fileName` (first parameter): the output JSON file's name (with extension).
+- `fileName` (first parameter, string or `undefined`, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
+
+## Configs
+
+You can set global configurations such as the hash algorithm and length (as well as the output `fileName`, which is useful when using a custom output filename and multiple entry points, more on that later) by calling the `.config()` method. It is very jQuery-y:
+
+```js
+var bust = require('gulp-buster');
+
+// accepts an object as setter
+bust.config({
+	hash: 'sha1',
+	length: 6
+});
+
+// pass no arguments to retrieve the current configs object
+var configs = bust.config(); // { fileName: 'busters.json', hash: 'sha1', length: 6 [, ...] }
+// NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
+// to edit the plugin's configs by assigning to this object's properties.
+
+// pass two arguments to set the value for a single config
+bust.config('length', 8);
+
+// and of course, pass a single string to retrieve the given config's value
+var lengthLimit = bust.config('length'); // 8
+```
+
+### Available configurations
+
+- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `busters.json`.
+- `algo` (string): the hashing algorithm to be used. Defaults to `md5`. Accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm).
+- `length` (number): the maximum length of the hash. If specified, only the leading characters of the hash (up to `length`) will be returned. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
+
+## Multiple streams - single and multiple output files
+
+gulp-buster groups hashes by the output `fileName`. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file (obviously, you should then set both streams' `.dest()` to the same path to don't create duplicated output files). Likewise, in case you'd like two streams' files to have their hashes outputted to different files, simply pass different filenames (and set their `.dest()` to your liking).
 
 ## Integrating with Web applications
 
@@ -92,6 +127,10 @@ There are many ways to implement this in the front-end as well. If using an AMD 
 As the asset loader implementation is up to you, you may make it the way which better fits your application. My personal implementation checks the file extension (js/css/png) and returns the full HTML tag for it, accepts string/array of strings overloading for the path argument, and also takes the base path as an optional argument.
 
 You may publish your own gulp-buster asset loaders in GitHub and contact me by [opening an issue](https://github.com/UltCombo/gulp-buster/issues/new) in this repository in case you'd like your asset loader to be published here. Make sure to include clear how to use instructions in the readme file of your asset loader's repository.
+
+## Changelog
+
+[Available here.](https://github.com/UltCombo/gulp-buster/blob/master/CHANGELOG.md)
 
 ## FAQ
 
