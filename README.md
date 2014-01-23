@@ -136,8 +136,8 @@ You may publish your own gulp-buster asset loaders in GitHub and contact me by [
 
 ## FAQ
 
-**Q. Is the correct name gulp-buster, gulp-buster or gulp-Buster?**
+**Q. Is the correct name Gulp-Buster, gulp-buster or Gulp-buster?**<br>
 The name is always lowercase, matching the npm package name.
 
-**Q. I am having issues with watch mode, what am I doing wrong?**
+**Q. I am having issues with watch mode, what am I doing wrong?**<br>
 It is strongly advised to use the [`gulp-watch`](https://npmjs.org/package/gulp-watch) plugin for piping files into gulp-buster. Other watchers may not pipe all source files when starting the task and thus causes gulp-buster to not create the initial in-memory hashes cache of all tracked files.
