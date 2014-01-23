@@ -78,6 +78,8 @@ var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length
 
 gulp-buster groups hashes by the output `fileName`. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file (obviously, you should then set both streams' `.dest()` to the same path to don't create duplicated output files). Likewise, in case you'd like two streams' files to have their hashes outputted to different files, simply pass different filenames (and set their `.dest()` to your liking).
 
+<!-- TODO lacking example, add it once gulp 3.5 is released with this fix https://github.com/gulpjs/gulp/issues/185 -->
+
 ## Integrating with Web applications
 
 gulp-buster is language-agnostic, thus this part relies on you and your specific use case. gulp-buster generates a JSON file in the following format:
