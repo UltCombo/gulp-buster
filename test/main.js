@@ -115,6 +115,29 @@ describe('gulp-buster', function() {
 			stream2.end();
 		});
 
+		it('should export hashes', function() {
+			var fileContentStr = "foo";
+
+			var stream = bust("output1.json");
+			var fakeFile = new File({
+				cwd: "/home/contra/",
+				base: "/home/contra/test",
+				path: "/home/contra/test/file.js",
+				contents: new Buffer(fileContentStr)
+			});
+
+			stream.on('data', function(newFile) {
+				var obj = JSON.parse(newFile.contents.toString());
+				should.exist(obj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)]);
+			});
+			stream.write(fakeFile);
+			stream.end();
+
+			var hashes = bust.hashes();
+			hashes.should.have.property('output1.json');
+			hashes['output1.json'].should.have.property('test/file.js');
+		});
+
 
 	});
 
