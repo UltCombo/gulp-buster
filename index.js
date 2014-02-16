@@ -10,7 +10,8 @@ var PLUGIN_NAME = 'gulp-buster',
 	defaultConfig = {
 		fileName: 'busters.json',
 		algo: 'md5',
-		length: 0
+		length: 0,
+		mode: 'file'
 	},
 	config = extend({}, defaultConfig),
 	hashes = {};
@@ -36,19 +37,30 @@ module.exports = function(fileName) {
 	fileName = fileName || config.fileName;
 	hashes[fileName] = hashes[fileName] || {};
 
-	var firstFile;
+	var isDirectoryMode = config.mode === 'dir',
+	    firstFile;
 
 	function bufferContents(file) {
 		if (file.isNull()) return; // ignore
 		if (file.isStream()) return this.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
 
 		if (!firstFile) firstFile = file;
-
-		hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
+                if(isDirectoryMode) {
+                  hashes[fileName][path_relative_to_project(file.cwd, file.base)] = hashes[fileName][path_relative_to_project(file.cwd, file.base)] || '' + file.contents;
+                } else {
+                  hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
+                }
 	}
 
 	function endStream() {
-		var file = new File({
+                var key, file;
+                if(isDirectoryMode) {
+                  for(key in hashes[fileName]) {
+                    hashes[fileName][key] = hash(hashes[fileName][key]);
+                  }
+                }
+                
+		file = new File({
 			cwd: firstFile.cwd,
 			base: firstFile.base,
 			path: path.join(firstFile.base, fileName),
