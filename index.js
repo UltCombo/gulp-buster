@@ -38,28 +38,29 @@ module.exports = function(fileName) {
 	hashes[fileName] = hashes[fileName] || {};
 
 	var isDirectoryMode = config.mode === 'dir',
-	    firstFile;
+	combinedFileContents = {},
+	firstFile;
 
 	function bufferContents(file) {
 		if (file.isNull()) return; // ignore
 		if (file.isStream()) return this.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
 
 		if (!firstFile) firstFile = file;
-                if(isDirectoryMode) {
-                  hashes[fileName][path_relative_to_project(file.cwd, file.base)] = hashes[fileName][path_relative_to_project(file.cwd, file.base)] || '' + file.contents;
-                } else {
-                  hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
-                }
+		if(isDirectoryMode) {
+			combinedFileContents[path_relative_to_project(file.cwd, file.base)] = combinedFileContents[path_relative_to_project(file.cwd, file.base)] || '' + file.contents;
+		} else {
+			hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
+		}
 	}
 
 	function endStream() {
-                var key, file;
-                if(isDirectoryMode) {
-                  for(key in hashes[fileName]) {
-                    hashes[fileName][key] = hash(hashes[fileName][key]);
-                  }
-                }
-                
+		var key, file;
+		if(isDirectoryMode && combinedFileContents) {
+			for(key in combinedFileContents) {
+				hashes[fileName][key] = hash(combinedFileContents[key]);
+			}
+		}
+
 		file = new File({
 			cwd: firstFile.cwd,
 			base: firstFile.base,
