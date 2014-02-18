@@ -4,7 +4,6 @@ var should = require('should');
 var path = require('path');
 var File = require('gulp-util').File;
 var Buffer = require('buffer').Buffer;
-var fs = require('fs');
 require('mocha');
 
 beforeEach(function() {
