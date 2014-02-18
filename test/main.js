@@ -155,4 +155,113 @@ describe('gulp-buster', function() {
 			bust.config('foo').should.equal('bar');
 		});
 	});
+
+	describe('directory mode', function() {
+		var file1Directory1 = new File({
+			cwd: ".",
+			base: "fixture/dir1",
+			path: "fixture/dir1/file1.js",
+			contents: new Buffer("// File 1, Directory 1")
+		}),
+		file2Directory1 = new File({
+			cwd: ".",
+			base: "fixture/dir1",
+			path: "fixture/dir1/file2.js",
+			contents: new Buffer("// File 2, Directory 1")
+		}),
+		file1Directory2 = new File({
+			cwd: ".",
+			base: "fixture/dir2",
+			path: "fixture/dir2/file1.js",
+			contents: new Buffer("// File 1, Directory 2")
+		});
+
+		it('should generate different output than file mode', function() {
+			var stream, fileModeOutput, dirModeOutput;
+
+			bust.config({fileName: 'test.json'});
+			stream = bust();
+			stream.on('end', function(){
+				fileModeOutput = bust.hashes();
+				if(dirModeOutput !== undefined && fileModeOutput !== undefined) {
+					dirModeOutput.should.not.equal(fileModeOutput)
+				}
+			});
+			stream.write(file1Directory1);
+			stream.end();
+
+			bust._reset();
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function(){
+				dirModeOutput = bust.hashes();
+				if(dirModeOutput !== undefined && fileModeOutput !== undefined) {
+					dirModeOutput.should.not.equal(fileModeOutput)
+				}
+			});
+			stream.write(file1Directory1);
+			stream.end();
+			
+		});
+
+		it("should generate hashes whose keys are base directories", function() {
+			var stream, baseDirectory, directoryHashes;
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function() {
+				directoryHashes = bust.hashes()['test.json'];
+				for(baseDirectory in directoryHashes) {
+					[file1Directory1.base, file1Directory2.base, file2Directory1.base].should.containEql(baseDirectory);
+				}
+			});
+			stream.write(file1Directory1);
+			stream.write(file2Directory1);
+			stream.write(file1Directory2);
+			stream.end();
+		});
+
+		it('should generate different hashes when the contents of a base directory are different', function() {
+			var outputs = [], stream;
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function() {
+				outputs.push(bust.hashes()['test.json']);
+			});
+			stream.write(file1Directory1);
+			stream.end();
+
+			bust._reset();
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function() {
+				outputs.push(bust.hashes()['test.json']);
+				outputs[0]['fixture/dir1'].should.not.equal(outputs[1]['fixture/dir1']);
+			});
+			stream.write(file2Directory1);
+			stream.end();
+		});
+
+		it('should generate the same hashes when the contents of a base directory are the same', function() {
+			var outputs = [], stream;
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function() {
+				outputs.push(bust.hashes()['test.json']);
+			});
+			stream.write(file1Directory1);
+			stream.write(file2Directory1);
+			stream.end();
+
+			bust._reset();
+			bust.config({fileName: 'test.json', mode: 'dir'});
+			stream = bust();
+			stream.on('end', function() {
+				outputs.push(bust.hashes()['test.json']);
+				outputs[0]['fixture/dir1'].should.equal(outputs[1]['fixture/dir1']);
+			});
+			stream.write(file1Directory1);
+			stream.write(file2Directory1);
+			stream.end();
+		});
+	});
 });
