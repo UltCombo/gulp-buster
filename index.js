@@ -48,7 +48,6 @@ module.exports = function(fileName) {
 		if (!firstFile) firstFile = file;
 		if(isDirectoryMode) {
 			combinedFileContents[path_relative_to_project(file.cwd, file.base)] = (combinedFileContents[path_relative_to_project(file.cwd, file.base)] || '') + file.contents;
-			console.log(combinedFileContents);
 		} else {
 			hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
 		}
