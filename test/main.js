@@ -58,10 +58,6 @@ describe('gulp-buster', function() {
 				should.exist(newFile.relative);
 				should.exist(newFile.contents);
 
-				var newFilePath = path.resolve(newFile.path);
-				var expectedFilePath = path.resolve("/home/contra/test/output.json");
-				newFilePath.should.equal(expectedFilePath);
-
 				newFile.relative.should.equal("output.json");
 				var expectedObj = {};
 				expectedObj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)] = bust._hash(fileContentStr);
@@ -138,6 +134,13 @@ describe('gulp-buster', function() {
 			hashes['output1.json'].should.have.property('test/file.js');
 		});
 
+		it('should return an empty hashes object file when receiving an empty buffers stream', function() {
+			var stream = bust("empty.json");
+			stream.on('data', function(newFile) {
+				JSON.parse(newFile.contents.toString()).should.eql({});
+			});
+			stream.end();
+		});
 
 	});
 
