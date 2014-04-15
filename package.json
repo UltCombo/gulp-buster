@@ -17,16 +17,16 @@
     "url": "https://github.com/UltCombo/gulp-buster.git"
   },
   "dependencies": {
-    "event-stream": "~3.1.0",
-    "gulp-util": "~2.2.12"
+    "event-stream": "^3.1.0",
+    "gulp-util": "^2.2.12"
   },
   "engines": {
     "node": ">= 0.9"
   },
   "license": "WTFPL",
   "devDependencies": {
-    "should": "~3.1.0",
-    "mocha": "~1.17.0"
+    "should": "^3.3",
+    "mocha": "^1.18"
   },
   "scripts": {
     "test": "mocha"
