@@ -138,6 +138,28 @@ describe('gulp-buster', function() {
 			hashes['output1.json'].should.have.property('test/file.js');
 		});
 
+		it('should do nothing if fileinput array contains no non-empty files', function() {
+
+			var stream = bust('output1.json');
+
+			var fakeFile = new File({
+				contents: undefined,
+				cwd: "/home/contra/",
+				base: "/home/contra/test",
+				path: "/home/contra/test/undefined_file.js"
+			});
+
+			stream.on('data', function(newFile) {
+				should.not.exist(obj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)]);
+			});
+
+			stream.write(fakeFile);
+			stream.end();
+
+			var hashes = bust.hashes();
+			hashes['output1.json'].should.not.have.property('test/undefined_file.js');
+		});
+
 
 	});
 

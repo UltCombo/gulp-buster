@@ -54,6 +54,11 @@ module.exports = function(fileName) {
 	}
 
 	function endStream() {
+
+		if(typeof firstFile === 'undefined') {
+			this.emit('end');
+			return;
+		}
 		var key, file;
 		if (isDirectoryMode) {
 			for (key in combinedFileContents) {
