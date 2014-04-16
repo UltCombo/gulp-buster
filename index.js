@@ -52,9 +52,6 @@ module.exports = function(fileName) {
 	}
 
 	function endStream() {
-		// handle empty streams
-		hashes[fileName] = hashes[fileName] || {};
-
 		var key, file;
 		if (isDirectoryMode) {
 			for (key in combinedFileContents) {
