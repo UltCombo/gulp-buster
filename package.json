@@ -25,8 +25,8 @@
   },
   "license": "WTFPL",
   "devDependencies": {
-    "should": "^3.3",
-    "mocha": "^1.18"
+    "mocha": "^1.18",
+    "should": "^4.0"
   },
   "scripts": {
     "test": "mocha"
