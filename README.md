@@ -6,6 +6,22 @@
 
 Cache buster hashes generator for gulp
 
+## What is cache busting?
+
+It is basically a way to expire a given resource.
+
+As a mean to optimize web applications, it is recommended to set assets' expiration date to a long time in the future (usually one month to one year). This way, the browser can load the cached resources from the local disk rather than over the network.
+
+But of course, that also means the browser won't even attempt to load a resource from the network while it has a non-expired cached version of the given resource, even if that resource has been modified in the server. Then, how to invalidate this cached resource and force the browser to load the new version?
+
+Here enters cache busting, also known as "fingerprinting", as described in [Optimize Caching - Google Developers](https://developers.google.com/speed/docs/best-practices/caching):
+
+> For resources that change occasionally, you can have the browser cache the resource until it changes on the server, at which point the server tells the browser that a new version is available. You accomplish this by embedding a fingerprint of the resource in its URL (i.e. the file path). When the resource changes, so does its fingerprint, and in turn, so does its URL. As soon as the URL changes, the browser is forced to re-fetch the resource. Fingerprinting allows you to set expiry dates long into the future even for resources that change more frequently.
+
+**Note:** Even if you are not explicitly setting expiration headers, browsers are allowed and **will** cache assets such as CSS and image files. This means, without proper cache busting, your clients may get broken pages (e.g. updated markup with outdated styling and images which were automatically cached by the browser) even if your server does not specify caching headers! (which it should anyway)
+
+Of course, technically, the caching issue could be worked around if every client refreshes the page, but that is not obvious to every user and, obviously, it would provide a terrible user experience and negatively affect the overall image of your product. And you don't want that, right? `;)`
+
 ## Install
 
 First off, [install gulp](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md).
@@ -39,9 +55,15 @@ gulp.task('default', function() {
 });
 ```
 
-## Parameters
+## Syntax
 
-- `fileName` (first parameter, string or `undefined`, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
+```none
+<through stream> bust([fileName])
+```
+
+### Parameters
+
+- `fileName` (string or `undefined`, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
 
 ## Configs
 
@@ -74,12 +96,6 @@ var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length
 - `algo` (string): the hashing algorithm to be used. Defaults to `md5`. Accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm).
 - `length` (number): the maximum length of the hash. If specified, only the leading characters of the hash (up to `length`) will be returned. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
 
-## Multiple streams - single and multiple output files
-
-gulp-buster groups hashes by the output `fileName`. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file (obviously, you should then set both streams' `.dest()` to the same path to don't create duplicated output files). Likewise, in case you'd like two streams' files to have their hashes outputted to different files, simply pass different filenames (and set their `.dest()` to your liking).
-
-<!-- TODO lacking example, add it once gulp 3.5 is released with this fix https://github.com/gulpjs/gulp/issues/185 -->
-
 ## Integrating with Web applications
 
 gulp-buster is language-agnostic, thus this part relies on you and your specific use case. gulp-buster generates a JSON file in the following format:
@@ -91,44 +107,18 @@ gulp-buster is language-agnostic, thus this part relies on you and your specific
 }
 ```
 
-Integration can be easily achieved on any language which supports JSON parsing, in either back-end or front-end. Here's a Node.js example:
+Integration can be easily achieved on any language which supports JSON parsing, in either back-end or front-end. See the [Implementations page](https://github.com/UltCombo/gulp-buster/blob/master/IMPLEMENTATIONS.md) for examples and existing solutions for your language of choice.
 
-**asset-loader.js**
-```js
-var busters = require('path/to/busters.json');
-module.exports = function(path) {
-	return path + (busters[path] ? '?' + busters[path] : '');
-};
-```
+## Architecture
 
-Then when outputting cache-busted file paths, simply call the asset loader passing the (relative to project root) file path. Example with Express and Jade:
+gulp-buster groups hashes by the output `fileName`. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file (obviously, you should then set both streams' `.dest()` to the same path in order to don't create duplicated output files). Likewise, in case you'd like two streams' files to have their hashes outputted to different files, you must use different filenames (and set their `.dest()` to your liking).
 
-```jade
-script(src=fooSrc)
-```
+When gulp-buster is initialized, it creates an empty object which serves as a cache for the generated hashes. This approach's main pros are:
 
-```js
-var asset = require('./asset-loader.js');
-res.render('view', { fooSrc: '/' + asset('js/min/foo.min.js') }, function(err, html) {
-	// ...
-});
-```
+- Allows piping only modified files into gulp-buster, the other hashes are retrieved from the cache when generating the output file;
+- Deleted files' hashes are automatically cleaned on startup, as the hashes cache object starts empty on every startup.
 
-As you can see, the gulp-buster `busters.json`'s paths are relative to project root without the leading slash, so we manually prepend a `/` to the cache-busted URL. This works nicely if your project root corresponds to the web server root. Otherwise, you will have to prepend the correct base URL. The optimal way would be to dynamically retrieve your app's base URL, specially as the project path relative to the web server root may differ between production and local development environments (e.g. it is a common scenario to have the project run at `/` in the production server and at `/myProject/` in local development).
-
-There are many ways to implement this in the front-end as well. If using an AMD loader such as Require.js, you can map modules to cache-busted URLs in the config. Even without any loader, it is possible to `document.write` the scripts as follows:
-
-```js
-['app', 'services', 'controllers', 'filters', 'directives'].forEach(function(s) {
-	document.write('<script src="/' + asset('js/' + s + '.js') + '"><\/script>');
-});
-```
-
-**Note:** If implementing this in the front-end, make sure to load the fresh (non-cached) `busters.json` file. That is, retrieving it through an Ajax request may return a cached version of it depending on the server configurations. Append a timestamp to the request URL's querystring to prevent caching issues. You may also output the JSON file's contents inside of a dynamic page's `<script>` tag assigning it to a variable. JSON (JavaScript Object Notation) is a subset of the JS object/array literals syntax, so this is perfectly valid as well.
-
-As the asset loader implementation is up to you, you may make it the way which better fits your application. My personal implementation checks the file extension (js/css/png) and returns the full HTML tag for it, accepts string/array of strings overloading for the path argument, and also takes the base path as an optional argument.
-
-You may publish your own gulp-buster asset loaders in GitHub and contact me by [opening an issue](https://github.com/UltCombo/gulp-buster/issues/new) in this repository in case you'd like your asset loader to be published here. Make sure to include clear how to use instructions in the readme file of your asset loader's repository.
+There are close to no cons, the only notable drawback is that all the to-be-busted files must be piped into gulp-buster (preferably at startup) before it generates the output file with all hashes that you'd expect. A feature to allow inputting an already-generated hashes file was considered in order to avoid having to pipe all the to-be-busted files at startup, but that seems to bring more cons than pros -- the auto-cleanup of deleted files' hashes would no longer happen, outdated hashes could stay in the output hashes file if the to-be-busted files were edited while gulp was not running, and finally it'd also be incompatible with currently planned features (output `transform` and `formatter`).
 
 ## Changelog
 
@@ -138,6 +128,3 @@ You may publish your own gulp-buster asset loaders in GitHub and contact me by [
 
 **Q. Is the correct name Gulp-Buster, gulp-buster or Gulp-buster?**<br>
 The name is always lowercase, matching the npm package name.
-
-**Q. I am having issues with watch mode, what am I doing wrong?**<br>
-It is strongly advised to use the [`gulp-watch`](https://npmjs.org/package/gulp-watch) plugin for piping files into gulp-buster. Other watchers may not pipe all source files when starting the task and thus causes gulp-buster to not create the initial in-memory hashes cache of all tracked files.
