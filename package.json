@@ -1,7 +1,7 @@
 {
   "name": "gulp-buster",
   "description": "Cache buster hashes generator for gulp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": {
     "name": "Ult Combo",
     "email": "ultcombo@gmail.com"
