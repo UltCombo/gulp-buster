@@ -63,7 +63,7 @@ gulp.task('default', function() {
 
 ### Parameters
 
-- `fileName` (string or `undefined`, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
+- `fileName` (string, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
 
 ## Configs
 
