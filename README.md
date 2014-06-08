@@ -18,7 +18,7 @@ Here enters cache busting, also known as "fingerprinting", as described in [Opti
 
 > For resources that change occasionally, you can have the browser cache the resource until it changes on the server, at which point the server tells the browser that a new version is available. You accomplish this by embedding a fingerprint of the resource in its URL (i.e. the file path). When the resource changes, so does its fingerprint, and in turn, so does its URL. As soon as the URL changes, the browser is forced to re-fetch the resource. Fingerprinting allows you to set expiry dates long into the future even for resources that change more frequently.
 
-**Note:** Even if you are not explicitly setting expiration headers, browsers are allowed and **will** cache assets such as CSS and image files. This means, without proper cache busting, your clients may get broken pages (e.g. updated markup with outdated styling and images which were automatically cached by the browser) even if your server does not send caching headers! (which it should send anyway)
+**Note:** Even if you are not explicitly setting expiration headers, browsers are allowed to and **will** cache assets such as CSS and image files. This means, without proper cache busting, your clients may get broken pages (e.g. updated markup with outdated styling and images which were automatically cached by the browser) even if your server does not send caching headers! (which it should send anyway)
 
 Of course, technically, the caching issue could be worked around if every client refreshes the page, but that is not obvious to every user and, obviously, it would provide a terrible user experience and negatively affect the overall image of your product. And you don't want that, right? `;)`
 
