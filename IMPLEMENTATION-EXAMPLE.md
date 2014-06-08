@@ -1,6 +1,6 @@
 # Implementation examples
 
-These examples explains the basic logic necessary to implement gulp-buster into your application.
+These examples explain the basic logic necessary to implement gulp-buster into your application.
 
 ## Node.js + Jade
 
