@@ -10,7 +10,15 @@
   "keywords": [
     "gulpplugin",
     "cachebuster",
-    "cache buster"
+    "cache buster",
+    "cache",
+    "fingerprint",
+    "fingerprinting",
+    "revision",
+    "revisioning",
+    "workflow",
+    "webdev",
+    "web development"
   ],
   "repository": {
     "type": "git",
@@ -24,6 +32,9 @@
     "node": ">= 0.9"
   },
   "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/UltCombo/gulp-buster/issues"
+  },
   "devDependencies": {
     "mocha": "^1.18",
     "should": "^4.0"
