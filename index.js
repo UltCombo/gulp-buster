@@ -59,7 +59,7 @@ module.exports = function(fileName) {
 			}
 		}
 
-		content = (config.formatter && config.formatter(hashes[fileName])) || JSON.stringify(hashes[fileName])
+		content = (config.formatter && config.formatter(hashes[fileName])) || JSON.stringify(hashes[fileName]);
 
 		file = new File({
 			path: path.join(process.cwd(), fileName),
