@@ -52,16 +52,18 @@ module.exports = function(fileName) {
 	}
 
 	function endStream() {
-		var key, file;
+		var key, file, content;
 		if (isDirectoryMode) {
 			for (key in combinedFileContents) {
 				hashes[fileName][key] = hash(combinedFileContents[key]);
 			}
 		}
 
+		content = (config.formatter && config.formatter(hashes[fileName])) || JSON.stringify(hashes[fileName])
+
 		file = new File({
 			path: path.join(process.cwd(), fileName),
-			contents: new Buffer(JSON.stringify(hashes[fileName]))
+			contents: new Buffer(content)
 		});
 
 		this.emit('data', file);
