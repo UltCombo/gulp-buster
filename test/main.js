@@ -157,6 +157,32 @@ describe('gulp-buster', function() {
 			bust.config('foo', 'bar');
 			bust.config('foo').should.equal('bar');
 		});
+		it('should accept custom formatter', function() {
+			var fileContentStr = 'foo';
+
+			bust.config({
+				formatter: function(hashes) {
+					return Object.keys(hashes).reduce(function(soFar, key) {
+						return soFar + hashes[key];
+					}, '');
+				}
+			});
+
+			var stream = bust("output1.json");
+			var fakeFile = new File({
+				cwd: "/home/contra/",
+				base: "/home/contra/test",
+				path: "/home/contra/test/file.js",
+				contents: new Buffer(fileContentStr)
+			});
+
+			stream.on('data', function(newFile) {
+				newFile.contents.toString().should.equal(bust._hash(fileContentStr));
+			});
+
+			stream.write(fakeFile);
+			stream.end();
+		});
 	});
 
 	describe('directory mode', function() {

@@ -11,7 +11,8 @@ var PLUGIN_NAME = 'gulp-buster',
 		fileName: 'busters.json',
 		algo: 'md5',
 		length: 0,
-		mode: 'file'
+		mode: 'file',
+		formatter: JSON.stringify,
 	},
 	config = extend({}, defaultConfig),
 	hashes = {};
@@ -52,16 +53,22 @@ module.exports = function(fileName) {
 	}
 
 	function endStream() {
-		var key, file;
+		var key, file, content;
 		if (isDirectoryMode) {
 			for (key in combinedFileContents) {
 				hashes[fileName][key] = hash(combinedFileContents[key]);
 			}
 		}
 
+		content = config.formatter(hashes[fileName]);
+
+		if (typeof content !== 'string') {
+			return this.emit('error', new PluginError(PLUGIN_NAME, 'Return value of `config.formatter` should be a string'));
+		}
+
 		file = new File({
 			path: path.join(process.cwd(), fileName),
-			contents: new Buffer(JSON.stringify(hashes[fileName]))
+			contents: new Buffer(content)
 		});
 
 		this.emit('data', file);
