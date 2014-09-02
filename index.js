@@ -8,10 +8,11 @@ var PLUGIN_NAME = 'gulp-buster',
 	File = gutil.File,
 	PluginError = gutil.PluginError,
 	defaultConfig = {
-		fileName: 'busters.json',
 		algo: 'md5',
+		mode: 'file',
 		length: 0,
-		mode: 'file'
+		fileName: 'busters.json',
+		formatter: JSON.stringify
 	},
 	config = extend({}, defaultConfig),
 	hashes = {};
@@ -59,7 +60,11 @@ module.exports = function(fileName) {
 			}
 		}
 
-		content = (config.formatter && config.formatter(hashes[fileName])) || JSON.stringify(hashes[fileName]);
+		content = config.formatter(hashes[fileName]);
+
+		if (typeof content !== 'string') {
+			return this.emit('error', new PluginError(PLUGIN_NAME, 'Result of `config.formatter` should be a string'));
+		}
 
 		file = new File({
 			path: path.join(process.cwd(), fileName),
