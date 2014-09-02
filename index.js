@@ -63,7 +63,7 @@ module.exports = function(fileName) {
 		content = config.formatter(hashes[fileName]);
 
 		if (typeof content !== 'string') {
-			return this.emit('error', new PluginError(PLUGIN_NAME, 'Return value of `config.formatter` should be a string'));
+			return this.emit('error', new PluginError(PLUGIN_NAME, 'Return value of `config.formatter` must be a string'));
 		}
 
 		file = new File({
