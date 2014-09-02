@@ -92,9 +92,10 @@ var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length
 
 ### Available configurations
 
-- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `busters.json`.
 - `algo` (string): the hashing algorithm to be used. Defaults to `md5`. Accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm).
 - `length` (number): the maximum length of the hash. If specified, only the leading characters of the hash (up to `length`) will be returned. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
+- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `busters.json`.
+- `formatter` (function): the function responsible to transform object of hashes into content of file. It should return a string. It takes one argument, which is a object with file path in key and calculated hash in value. Defaults to `JSON.stringify`.
 
 ## Integrating with Web applications
 
