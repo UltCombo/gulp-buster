@@ -15,20 +15,18 @@ describe('gulp-buster', function() {
 			cwd: '/home/contra/',
 			base: '/home/contra/test',
 			path: '/home/contra/test/file.js',
-			contents: new Buffer(fileContentStr)
+			contents: new Buffer(fileContentStr),
 		}),
 		fakeFile2 = new File({
 			cwd: '/home/contra/',
 			base: '/home/contra/test',
 			path: '/home/contra/test/file2.js',
-			contents: new Buffer(fileContentStr2)
+			contents: new Buffer(fileContentStr2),
 		});
 
 	describe('Internal', function() {
 		it('should hash a string', function() {
-			var hash = bust._hash('foo');
-			hash.should.be.a.String;
-			hash.length.should.be.greaterThan(0);
+			bust._hash('foo').should.be.a.String.and.have.property('length').greaterThan(0);
 		});
 
 		it('should return a path relative to project root', function() {
@@ -126,9 +124,7 @@ describe('gulp-buster', function() {
 	describe('config options', function() {
 		describe('fileName', function() {
 			it('should allow setting the default file name', function(done) {
-				bust.config({
-					fileName: 'customName.ext',
-				});
+				bust.config('fileName', 'customName.ext');
 
 				var stream = bust();
 				stream.on('data', function(newFile) {
@@ -143,7 +139,7 @@ describe('gulp-buster', function() {
 		describe('algo', function() {
 			it('should allow setting the hashing algorithm', function() {
 				bust.config('algo', 'sha1');
-				bust._hash('foo').length.should.equal(40);
+				bust._hash('foo').should.be.a.String.with.lengthOf(40);
 			});
 		});
 
@@ -151,21 +147,16 @@ describe('gulp-buster', function() {
 			it('should return a hash with fixed length', function() {
 				var expectedLength = 6;
 				bust.config('length', expectedLength);
-
-				var hash = bust._hash('foo');
-				hash.should.be.a.String;
-				hash.length.should.equal(expectedLength);
+				bust._hash('foo').should.be.a.String.with.lengthOf(expectedLength);
 			});
 		});
 
 		describe('formatter', function() {
 			it('should accept a custom formatter', function(done) {
-				bust.config({
-					formatter: function(hashes) {
-						return Object.keys(hashes).reduce(function(soFar, key) {
-							return soFar + hashes[key];
-						}, '');
-					}
+				bust.config('formatter', function(hashes) {
+					return Object.keys(hashes).reduce(function(soFar, key) {
+						return soFar + hashes[key];
+					}, '');
 				});
 
 				var stream = bust('output1.json');
@@ -178,9 +169,7 @@ describe('gulp-buster', function() {
 			});
 
 			it('should emit an error when formatter does not return a string', function(done) {
-				bust.config({
-					formatter: function() {}
-				});
+				bust.config('formatter', function() {});
 				var stream = bust('output1.json');
 				stream.on('error', function() {
 					done();
@@ -197,19 +186,19 @@ describe('gulp-buster', function() {
 			cwd: '.',
 			base: 'fixture/dir1',
 			path: 'fixture/dir1/file1.js',
-			contents: new Buffer('// File 1, Directory 1')
+			contents: new Buffer('// File 1, Directory 1'),
 		}),
 		file2Directory1 = new File({
 			cwd: '.',
 			base: 'fixture/dir1',
 			path: 'fixture/dir1/file2.js',
-			contents: new Buffer('// File 2, Directory 1')
+			contents: new Buffer('// File 2, Directory 1'),
 		}),
 		file1Directory2 = new File({
 			cwd: '.',
 			base: 'fixture/dir2',
 			path: 'fixture/dir2/file1.js',
-			contents: new Buffer('// File 1, Directory 2')
+			contents: new Buffer('// File 1, Directory 2'),
 		});
 
 		it('should generate different output than file mode', function() {
