@@ -1,10 +1,10 @@
+'use strict';
+
 var bust = require('../');
 var should = require('should');
-//var os = require('os');
 var path = require('path');
 var File = require('gulp-util').File;
 var Buffer = require('buffer').Buffer;
-require('mocha');
 
 beforeEach(bust._reset);
 
@@ -83,39 +83,41 @@ describe('gulp-buster', function() {
 			stream2.end();
 		});
 
-		it('should export hashes', function() {
-			var stream = bust("output1.json");
-			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				should.exist(obj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)]);
-			});
-			stream.write(fakeFile);
-			stream.end();
-
-			var hashes = bust.hashes();
-			hashes.should.have.property('output1.json');
-			hashes['output1.json'].should.have.property('test/file.js');
-		});
-
-		it('should return an empty hashes object file when receiving an empty buffers stream', function() {
+		it('should return an empty hashes object file when receiving an empty buffers stream', function(done) {
 			var stream = bust("empty.json");
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString()).should.eql({});
+				done();
 			});
 			stream.end();
 		});
-
 	});
 
-	describe('bust.config() method', function() {
+	describe('.hashes()', function() {
+		it('should return all cached hashes', function(done) {
+			var stream = bust("output1.json");
+			stream.on('end', function() {
+				var hashes = bust.hashes();
+				hashes.should.have.property('output1.json');
+				hashes['output1.json'].should.have.property('test/file.js');
+				done();
+			});
+			stream.write(fakeFile);
+			stream.end();
+		});
+	});
+
+	describe('.config()', function() {
 		it('should return the configs object', function() {
 			bust.config().should.be.an.Object;
 		});
+
 		it('should accept an object as setter; string as getter', function() {
 			bust.config({ foo: 0, bar: 1 });
 			bust.config('foo').should.equal(0);
 			bust.config('bar').should.equal(1);
 		});
+
 		it('should accept two arguments as setter', function() {
 			bust.config('foo', 'bar');
 			bust.config('foo').should.equal('bar');
@@ -123,37 +125,51 @@ describe('gulp-buster', function() {
 	});
 
 	describe('config options', function() {
-		it('should return a hash with fixed length', function() {
-			var expectedLength = 6;
-			bust.config('length', expectedLength);
+		describe('length', function() {
+			it('should return a hash with fixed length', function() {
+				var expectedLength = 6;
+				bust.config('length', expectedLength);
 
-			var hash = bust._hash('foo');
-			hash.should.be.a.String;
-			hash.length.should.equal(expectedLength);
+				var hash = bust._hash('foo');
+				hash.should.be.a.String;
+				hash.length.should.equal(expectedLength);
+			});
 		});
 
-		it('should accept a custom formatter', function() {
-			bust.config({
-				formatter: function(hashes) {
-					return Object.keys(hashes).reduce(function(soFar, key) {
-						return soFar + hashes[key];
-					}, '');
-				}
+		describe('formatter', function() {
+			it('should accept a custom formatter', function(done) {
+				bust.config({
+					formatter: function(hashes) {
+						return Object.keys(hashes).reduce(function(soFar, key) {
+							return soFar + hashes[key];
+						}, '');
+					}
+				});
+
+				var stream = bust("output1.json");
+				stream.on('data', function(newFile) {
+					newFile.contents.toString().should.equal(bust._hash(fileContentStr));
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
 			});
 
-			var stream = bust("output1.json");
-			stream.on('data', function(newFile) {
-				newFile.contents.toString().should.equal(bust._hash(fileContentStr));
+			it('should emit an error when formatter does not return a string', function(done) {
+				bust.config({
+					formatter: function() {}
+				});
+				var stream = bust("output1.json");
+				stream.on('error', function() {
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
 			});
-			stream.write(fakeFile);
-			stream.end();
-		});
-
-		it.skip('should throw when formatter does not return a string', function() {
-
 		});
 	});
 
+	// TODO remove this suite when the `transform` config option is implemented
 	describe('directory mode', function() {
 		var file1Directory1 = new File({
 			cwd: ".",
