@@ -1,26 +1,26 @@
 'use strict';
 
-var bust = require('../');
-var should = require('should');
-var path = require('path');
-var File = require('gulp-util').File;
-var Buffer = require('buffer').Buffer;
+var bust = require('../'),
+	should = require('should'),
+	path = require('path'),
+	File = require('gulp-util').File,
+	Buffer = require('buffer').Buffer;
 
 beforeEach(bust._reset);
 
 describe('gulp-buster', function() {
-	var fileContentStr = "foo",
-		fileContentStr2 = "bar",
+	var fileContentStr = 'foo',
+		fileContentStr2 = 'bar',
 		fakeFile = new File({
-			cwd: "/home/contra/",
-			base: "/home/contra/test",
-			path: "/home/contra/test/file.js",
+			cwd: '/home/contra/',
+			base: '/home/contra/test',
+			path: '/home/contra/test/file.js',
 			contents: new Buffer(fileContentStr)
 		}),
 		fakeFile2 = new File({
-			cwd: "/home/contra/",
-			base: "/home/contra/test",
-			path: "/home/contra/test/file2.js",
+			cwd: '/home/contra/',
+			base: '/home/contra/test',
+			path: '/home/contra/test/file2.js',
 			contents: new Buffer(fileContentStr2)
 		});
 
@@ -32,24 +32,23 @@ describe('gulp-buster', function() {
 		});
 
 		it('should return a path relative to project root', function() {
-			bust._path_relative_to_project('/projectRoot/', '/projectRoot/folder/file.ext')
-				.should.equal('folder/file.ext');
+			bust._relativePath('/projectRoot/', '/projectRoot/folder/file.ext').should.equal('folder/file.ext');
 		});
 	});
 
 	describe('Core', function() {
 		it('should bust two files into the same output', function(done) {
-			var stream = bust("output.json");
+			var stream = bust('output.json');
 			stream.on('data', function(newFile) {
 				should.exist(newFile);
 				should.exist(newFile.path);
 				should.exist(newFile.relative);
 				should.exist(newFile.contents);
 
-				newFile.relative.should.equal("output.json");
+				newFile.relative.should.equal('output.json');
 				var expectedObj = {};
-				expectedObj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)] = bust._hash(fileContentStr);
-				expectedObj[bust._path_relative_to_project(fakeFile2.cwd, fakeFile2.path)] = bust._hash(fileContentStr2);
+				expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = bust._hash(fileContentStr);
+				expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = bust._hash(fileContentStr2);
 
 				JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
 				Buffer.isBuffer(newFile.contents).should.equal(true);
@@ -61,20 +60,20 @@ describe('gulp-buster', function() {
 		});
 
 		it('should bust two files into different outputs', function(done) {
-			var stream = bust("output1.json"),
-				stream2 = bust("output2.json");
+			var stream = bust('output1.json'),
+				stream2 = bust('output2.json');
 
 			var testedOutputs = 0;
 			stream.on('data', function(newFile) {
 				var obj = JSON.parse(newFile.contents.toString());
-				should.exist(obj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)]);
-				should.not.exist(obj[bust._path_relative_to_project(fakeFile2.cwd, fakeFile2.path)]);
+				should.exist(obj[bust._relativePath(fakeFile.cwd, fakeFile.path)]);
+				should.not.exist(obj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)]);
 				if (++testedOutputs === 2) done();
 			});
 			stream2.on('data', function(newFile) {
 				var obj = JSON.parse(newFile.contents.toString());
-				should.not.exist(obj[bust._path_relative_to_project(fakeFile.cwd, fakeFile.path)]);
-				should.exist(obj[bust._path_relative_to_project(fakeFile2.cwd, fakeFile2.path)]);
+				should.not.exist(obj[bust._relativePath(fakeFile.cwd, fakeFile.path)]);
+				should.exist(obj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)]);
 				if (++testedOutputs === 2) done();
 			});
 			stream.write(fakeFile);
@@ -84,7 +83,7 @@ describe('gulp-buster', function() {
 		});
 
 		it('should return an empty hashes object file when receiving an empty buffers stream', function(done) {
-			var stream = bust("empty.json");
+			var stream = bust('empty.json');
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString()).should.eql({});
 				done();
@@ -95,7 +94,7 @@ describe('gulp-buster', function() {
 
 	describe('.hashes()', function() {
 		it('should return all cached hashes', function(done) {
-			var stream = bust("output1.json");
+			var stream = bust('output1.json');
 			stream.on('end', function() {
 				var hashes = bust.hashes();
 				hashes.should.have.property('output1.json');
@@ -146,7 +145,7 @@ describe('gulp-buster', function() {
 					}
 				});
 
-				var stream = bust("output1.json");
+				var stream = bust('output1.json');
 				stream.on('data', function(newFile) {
 					newFile.contents.toString().should.equal(bust._hash(fileContentStr));
 					done();
@@ -159,7 +158,7 @@ describe('gulp-buster', function() {
 				bust.config({
 					formatter: function() {}
 				});
-				var stream = bust("output1.json");
+				var stream = bust('output1.json');
 				stream.on('error', function() {
 					done();
 				});
@@ -172,22 +171,22 @@ describe('gulp-buster', function() {
 	// TODO remove this suite when the `transform` config option is implemented
 	describe('directory mode', function() {
 		var file1Directory1 = new File({
-			cwd: ".",
-			base: "fixture/dir1",
-			path: "fixture/dir1/file1.js",
-			contents: new Buffer("// File 1, Directory 1")
+			cwd: '.',
+			base: 'fixture/dir1',
+			path: 'fixture/dir1/file1.js',
+			contents: new Buffer('// File 1, Directory 1')
 		}),
 		file2Directory1 = new File({
-			cwd: ".",
-			base: "fixture/dir1",
-			path: "fixture/dir1/file2.js",
-			contents: new Buffer("// File 2, Directory 1")
+			cwd: '.',
+			base: 'fixture/dir1',
+			path: 'fixture/dir1/file2.js',
+			contents: new Buffer('// File 2, Directory 1')
 		}),
 		file1Directory2 = new File({
-			cwd: ".",
-			base: "fixture/dir2",
-			path: "fixture/dir2/file1.js",
-			contents: new Buffer("// File 1, Directory 2")
+			cwd: '.',
+			base: 'fixture/dir2',
+			path: 'fixture/dir2/file1.js',
+			contents: new Buffer('// File 1, Directory 2')
 		});
 
 		it('should generate different output than file mode', function() {
@@ -220,7 +219,7 @@ describe('gulp-buster', function() {
 
 		});
 
-		it("should generate hashes whose keys are base directories", function() {
+		it('should generate hashes whose keys are base directories', function() {
 			var stream, baseDirectory, directoryHashes;
 			bust.config({fileName: 'test.json', mode: 'dir'});
 			stream = bust();

@@ -30,7 +30,7 @@ function hash(str) {
 	return config.length ? ret.substr(0, config.length) : ret;
 }
 
-function path_relative_to_project(projectPath, filePath) {
+function relativePath(projectPath, filePath) {
 	return path.relative(projectPath, filePath).replace(/\\/g, '/');
 }
 
@@ -46,9 +46,9 @@ module.exports = function(fileName) {
 		if (file.isStream()) return this.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
 
 		if(isDirectoryMode) {
-			combinedFileContents[path_relative_to_project(file.cwd, file.base)] = (combinedFileContents[path_relative_to_project(file.cwd, file.base)] || '') + file.contents;
+			combinedFileContents[relativePath(file.cwd, file.base)] = (combinedFileContents[relativePath(file.cwd, file.base)] || '') + file.contents;
 		} else {
-			hashes[fileName][path_relative_to_project(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
+			hashes[fileName][relativePath(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
 		}
 	}
 
@@ -100,7 +100,7 @@ module.exports.hashes = function() {
 
 // for testing. Don't use, may be removed or changed at anytime
 module.exports._hash = hash;
-module.exports._path_relative_to_project = path_relative_to_project;
+module.exports._relativePath = relativePath;
 module.exports._reset = function() {
 	config = extend({}, defaultConfig);
 	hashes = {};
