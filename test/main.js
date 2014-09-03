@@ -124,6 +124,29 @@ describe('gulp-buster', function() {
 	});
 
 	describe('config options', function() {
+		describe('fileName', function() {
+			it('should allow setting the default file name', function(done) {
+				bust.config({
+					fileName: 'customName.ext',
+				});
+
+				var stream = bust();
+				stream.on('data', function(newFile) {
+					newFile.relative.should.equal('customName.ext');
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
+			});
+		});
+
+		describe('algo', function() {
+			it('should allow setting the hashing algorithm', function() {
+				bust.config('algo', 'sha1');
+				bust._hash('foo').length.should.equal(40);
+			});
+		});
+
 		describe('length', function() {
 			it('should return a hash with fixed length', function() {
 				var expectedLength = 6;
