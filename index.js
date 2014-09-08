@@ -11,7 +11,6 @@ var PLUGIN_NAME = 'gulp-buster',
 		fileName: 'busters.json',
 		algo: 'md5',
 		length: 0,
-		mode: 'file',
 		formatter: JSON.stringify,
 	},
 	config = extend({}, defaultConfig),
@@ -25,9 +24,12 @@ function extend(dest, src) {
 	return dest;
 }
 
-function hash(str) {
-	var ret = crypto.createHash(config.algo).update(str).digest('hex');
-	return config.length ? ret.substr(0, config.length) : ret;
+function hash(file) {
+  var ret = (typeof config.algo == 'function') ? config.algo(file).toString() :
+    crypto.createHash(config.algo).update(file.contents.toString('utf8')).digest('hex');
+
+  // for mtime it's important to take last, not first digits
+	return config.length ? ret.slice(-config.length) : ret;
 }
 
 function relativePath(projectPath, filePath) {
@@ -38,27 +40,16 @@ module.exports = function(fileName) {
 	fileName = fileName || config.fileName;
 	hashes[fileName] = hashes[fileName] || {};
 
-	var isDirectoryMode = config.mode === 'dir',
-		combinedFileContents = {};
+	var combinedFileContents = {};
 
-	function bufferContents(file) {
-		if (file.isNull()) return; // ignore
+	function hashFile(file) {
 		if (file.isStream()) return this.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
 
-		if(isDirectoryMode) {
-			combinedFileContents[relativePath(file.cwd, file.base)] = (combinedFileContents[relativePath(file.cwd, file.base)] || '') + file.contents;
-		} else {
-			hashes[fileName][relativePath(file.cwd, file.path)] = hash(file.contents.toString('utf8'));
-		}
+  	hashes[fileName][relativePath(file.cwd, file.path)] = hash(file);
 	}
 
 	function endStream() {
 		var key, file, content;
-		if (isDirectoryMode) {
-			for (key in combinedFileContents) {
-				hashes[fileName][key] = hash(combinedFileContents[key]);
-			}
-		}
 
 		content = config.formatter(hashes[fileName]);
 
@@ -75,7 +66,7 @@ module.exports = function(fileName) {
 		this.emit('end');
 	}
 
-	return es.through(bufferContents, endStream);
+	return es.through(hashFile, endStream);
 };
 
 module.exports.config = function(key, value) {
