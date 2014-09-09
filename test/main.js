@@ -155,6 +155,7 @@ describe('gulp-buster', function() {
 
 			it('should accept a synchronous function', function() {
 				bust.config('algo', function(file) {
+					(this === undefined).should.be.true;
 					return file.contents.toString();
 				});
 				bust._hash(fakeFile).should.equal(fileContentStr);
@@ -192,6 +193,7 @@ describe('gulp-buster', function() {
 			it('should accept a synchronous function', function(done) {
 				var suffix = '_suffix';
 				bust.config('transform', function(hashes) {
+					(this === undefined).should.be.true;
 					return [hashes[Object.keys(hashes)[0]] + suffix];
 				});
 
@@ -208,6 +210,7 @@ describe('gulp-buster', function() {
 		describe('formatter', function() {
 			it('should accept a synchronous function', function(done) {
 				bust.config('formatter', function(hashes) {
+					(this === undefined).should.be.true;
 					return Object.keys(hashes).reduce(function(soFar, key) {
 						return soFar + hashes[key];
 					}, '');
