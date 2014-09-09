@@ -1,5 +1,10 @@
 # Changelog
 
+## UNRELEASED
+
+- Added new options `formatter` and `transform`, `algo` now also accepts a function.
+- Removed the undocumented experimental `mode` option, use the new `transform` option instead.
+
 ## 0.2.0 Multidimensional Configurable Hashing Abyss
 
 - `fileName` parameter is now optional and defaults to `busters.json`;

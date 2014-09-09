@@ -153,7 +153,7 @@ describe('gulp-buster', function() {
 				stream.end();
 			});
 
-			it('should accept a function', function() {
+			it('should accept a synchronous function', function() {
 				bust.config('algo', function(file) {
 					return file.contents.toString();
 				});
@@ -188,8 +188,25 @@ describe('gulp-buster', function() {
 			});
 		});
 
+		describe('transform', function() {
+			it('should accept a synchronous function', function(done) {
+				var suffix = '_suffix';
+				bust.config('transform', function(hashes) {
+					return [hashes[Object.keys(hashes)[0]] + suffix];
+				});
+
+				var stream = bust();
+				stream.on('data', function(newFile) {
+					JSON.parse(newFile.contents.toString())[0].should.equal(bust._hash(fakeFile) + suffix);
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
+			});
+		});
+
 		describe('formatter', function() {
-			it('should accept a custom formatter', function(done) {
+			it('should accept a synchronous function', function(done) {
 				bust.config('formatter', function(hashes) {
 					return Object.keys(hashes).reduce(function(soFar, key) {
 						return soFar + hashes[key];

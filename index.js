@@ -9,6 +9,7 @@ var PLUGIN_NAME = 'gulp-buster',
 		fileName: 'busters.json',
 		algo: 'md5',
 		length: 0,
+		transform: Object,
 		formatter: JSON.stringify,
 	},
 	config = extend({}, defaultConfig),
@@ -65,7 +66,7 @@ module.exports = function(fileName) {
 	function endStream() {
 		var file, content;
 
-		content = config.formatter.call(undefined, hashes[fileName]);
+		content = config.formatter.call(undefined, config.transform.call(undefined, extend({}, hashes[fileName])));
 
 		if (typeof content !== 'string') {
 			return this.emit('error', error('Return value of `config.formatter` must be a string'));
