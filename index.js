@@ -29,7 +29,7 @@ function error(msg) {
 function hash(file) {
 	var ret;
 	if (typeof config.algo === 'function') {
-		ret = config.algo.call(null, file);
+		ret = config.algo.call(undefined, file);
 		if (typeof ret !== 'string') return error('Return value of `config.algo` must be a string');
 	} else try {
 		ret = crypto.createHash(config.algo).update(file.contents.toString()).digest('hex');
@@ -60,7 +60,7 @@ module.exports = function(fileName) {
 	function endStream() {
 		var file, content;
 
-		content = config.formatter.call(null, hashes[fileName]);
+		content = config.formatter.call(undefined, hashes[fileName]);
 
 		if (typeof content !== 'string') {
 			return this.emit('error', error('Return value of `config.formatter` must be a string'));
