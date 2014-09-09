@@ -37,7 +37,12 @@ function hash(file) {
 		return error(e.message);
 	}
 
-	return config.length ? ret.substr(0, config.length) : ret;
+	// positive length = leading characters; negative = trailing
+	return config.length
+		? config.length > 0
+			? ret.slice(0, config.length)
+			: ret.slice(config.length)
+		: ret;
 }
 
 function relativePath(projectPath, filePath) {

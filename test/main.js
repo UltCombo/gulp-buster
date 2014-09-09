@@ -174,10 +174,17 @@ describe('gulp-buster', function() {
 		});
 
 		describe('length', function() {
-			it('should return a hash with fixed length', function() {
+			it('should return leading characters for positive values; trailing for negative', function() {
 				var expectedLength = 6;
+
+				var fullHash = bust._hash(fakeFile);
+				fullHash.length.should.be.greaterThan(expectedLength);
+
 				bust.config('length', expectedLength);
-				bust._hash(fakeFile).should.be.a.String.with.lengthOf(expectedLength);
+				bust._hash(fakeFile).should.be.equal(fullHash.slice(0, expectedLength));
+
+				bust.config('length', -expectedLength);
+				bust._hash(fakeFile).should.be.equal(fullHash.slice(-expectedLength));
 			});
 		});
 
