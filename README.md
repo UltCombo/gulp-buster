@@ -120,7 +120,7 @@ When gulp-buster is initialized, it creates an empty object which serves as a ca
 - Allows piping only modified files into gulp-buster, the other hashes are retrieved from the cache when generating the output file;
 - Deleted files' hashes are automatically cleaned on startup, as the hashes cache object starts empty on every startup.
 
-There are close to no cons, the only notable drawback is that all the to-be-busted files must be piped into gulp-buster (preferably at startup) before it generates the output file with all hashes that you'd expect. A feature to allow inputting an already-generated hashes file was considered in order to avoid having to pipe all the to-be-busted files at startup, but that seems to bring more cons than pros -- the auto-cleanup of deleted files' hashes would no longer happen, outdated hashes could stay in the output hashes file if the to-be-busted files were edited while gulp was not running, and finally it'd also be incompatible with currently planned features (output `transform` and `formatter`).
+There are close to no cons, the only notable drawback is that all the to-be-busted files must be piped into gulp-buster (preferably at startup) before it generates the output file with all hashes that you'd expect. A feature to allow inputting an already-generated hashes file was considered in order to avoid having to pipe all the to-be-busted files at startup, but that seems to bring more cons than pros -- the auto-cleanup of deleted files' hashes would no longer happen, outdated hashes could stay in the output hashes file if the to-be-busted files were edited while gulp was not running, and finally it'd also be incompatible with the `transform` and `formatter` features.
 
 ## Changelog
 
