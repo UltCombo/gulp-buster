@@ -104,7 +104,7 @@ var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length
 
 ## Integrating with Web applications
 
-gulp-buster is language-agnostic, thus this part relies on you and your specific use case. gulp-buster generates a JSON file in the following format:
+gulp-buster is language-agnostic, thus this part relies on you and your specific use case. By default, gulp-buster generates a JSON file in the following format:
 
 ```js
 {
@@ -114,6 +114,8 @@ gulp-buster is language-agnostic, thus this part relies on you and your specific
 ```
 
 Integration can be easily achieved on any language which supports JSON parsing, in either back-end or front-end. See the [Implementations page](https://github.com/UltCombo/gulp-buster/blob/master/IMPLEMENTATIONS.md) for examples and existing solutions for your language of choice.
+
+**Note:** The output file contents' data structure and format can be customized through the [configuration options](#available-configurations). This enables gulp-buster to output the cache buster hashes file in a suitable native data structure for your target language, as well as allowing to mutate the paths and hashes to suit your specific needs.
 
 ## Architecture
 
