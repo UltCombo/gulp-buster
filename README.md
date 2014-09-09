@@ -92,8 +92,8 @@ var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length
 
 ### Available configurations
 
-- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `busters.json`.
-- `algo` (string): the hashing algorithm to be used. Defaults to `md5`. Accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). <!-- TODO document `algo` as a function -->
+- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `'busters.json'`.
+- `algo` (string|function): the hashing algorithm to be used. As a string, it accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). As a function, it takes a vinyl file as the first argument and must return a string. Defaults to `'md5'`.
 - `length` (number): the maximum length of the hash. If specified, only the leading characters of the hash (up to `length`) will be returned. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
 - `formatter` (function): the function responsible for serializing the hashes object into the string content of the output file. It takes the hashes object (a plain object in the `filePath: hash` format) as the first argument, and must return a string. Defaults to `JSON.stringify`.
 

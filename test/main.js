@@ -136,13 +136,41 @@ describe('gulp-buster', function() {
 		});
 
 		describe('algo', function() {
-			it('should allow setting the hashing algorithm', function() {
+			it('should accept a hashing algorithm name string', function() {
 				bust.config('algo', 'sha1');
 				bust._hash(fakeFile).should.be.a.String.with.lengthOf(40);
 			});
 
-			it('Should accept a function');
-			it('Should emit an error when `algo` function does not return a string');
+			it('should emit an error when the hashing algorithm is not supported', function(done) {
+				bust.config('algo', 'UltHasher9000');
+				bust._hash(fakeFile).should.be.an.Error;
+
+				var stream = bust();
+				stream.on('error', function() {
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
+			});
+
+			it('should accept a function', function() {
+				bust.config('algo', function(file) {
+					return file.contents.toString();
+				});
+				bust._hash(fakeFile).should.equal(fileContentStr);
+			});
+
+			it('should emit an error when function does not return a string', function(done) {
+				bust.config('algo', function() {});
+				bust._hash(fakeFile).should.be.an.Error;
+
+				var stream = bust();
+				stream.on('error', function() {
+					done();
+				});
+				stream.write(fakeFile);
+				stream.end();
+			});
 		});
 
 		describe('length', function() {
@@ -161,7 +189,7 @@ describe('gulp-buster', function() {
 					}, '');
 				});
 
-				var stream = bust('output1.json');
+				var stream = bust();
 				stream.on('data', function(newFile) {
 					newFile.contents.toString().should.equal(bust._hash(fakeFile));
 					done();
@@ -172,7 +200,7 @@ describe('gulp-buster', function() {
 
 			it('should emit an error when formatter does not return a string', function(done) {
 				bust.config('formatter', function() {});
-				var stream = bust('output1.json');
+				var stream = bust();
 				stream.on('error', function() {
 					done();
 				});

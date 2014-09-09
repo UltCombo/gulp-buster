@@ -5,8 +5,6 @@ var PLUGIN_NAME = 'gulp-buster',
 	path = require('path'),
 	es = require('event-stream'),
 	gutil = require('gulp-util'),
-	File = gutil.File,
-	PluginError = gutil.PluginError,
 	defaultConfig = {
 		fileName: 'busters.json',
 		algo: 'md5',
@@ -24,10 +22,20 @@ function extend(dest, src) {
 	return dest;
 }
 
+function error(msg) {
+	return new gutil.PluginError(PLUGIN_NAME, msg);
+}
+
 function hash(file) {
-	var ret = typeof config.algo === 'function'
-		? config.algo(file) // TODO emit error when returned value is not a string
-		: crypto.createHash(config.algo).update(file.contents.toString()).digest('hex');
+	var ret;
+	if (typeof config.algo === 'function') {
+		ret = config.algo.call(null, file);
+		if (typeof ret !== 'string') return error('Return value of `config.algo` must be a string');
+	} else try {
+		ret = crypto.createHash(config.algo).update(file.contents.toString()).digest('hex');
+	} catch(e) {
+		return error(e.message);
+	}
 
 	return config.length ? ret.substr(0, config.length) : ret;
 }
@@ -42,21 +50,23 @@ module.exports = function(fileName) {
 
 	function hashFile(file) {
 		if (file.isNull()) return; // ignore
-		if (file.isStream()) return this.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
+		if (file.isStream()) return this.emit('error', error('Streaming not supported'));
 
-		hashes[fileName][relativePath(file.cwd, file.path)] = hash(file);
+		var result = hash(file);
+		if (result instanceof gutil.PluginError) return this.emit('error', result);
+		hashes[fileName][relativePath(file.cwd, file.path)] = result;
 	}
 
 	function endStream() {
 		var file, content;
 
-		content = config.formatter(hashes[fileName]);
+		content = config.formatter.call(null, hashes[fileName]);
 
 		if (typeof content !== 'string') {
-			return this.emit('error', new PluginError(PLUGIN_NAME, 'Return value of `config.formatter` must be a string'));
+			return this.emit('error', error('Return value of `config.formatter` must be a string'));
 		}
 
-		file = new File({
+		file = new gutil.File({
 			path: path.join(process.cwd(), fileName),
 			contents: new Buffer(content)
 		});
@@ -80,7 +90,7 @@ module.exports.config = function(key, value) {
 			return config[key];
 		}
 	} else {
-		throw new PluginError(PLUGIN_NAME,  PLUGIN_NAME + ': Invalid first argument for .config(), must be object or string');
+		throw error('Invalid first argument for .config(), must be object or string');
 	}
 };
 
