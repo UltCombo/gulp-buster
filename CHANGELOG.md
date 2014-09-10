@@ -2,8 +2,13 @@
 
 ## UNRELEASED
 
-- Added new options `formatter` and `transform`, `algo` now also accepts a function.
+### Breaking changes
+
 - Removed the undocumented experimental `mode` option, use the new `transform` option instead.
+
+### New features
+
+- Configuration options: added new `formatter` and `transform` options, added support for `algo` as a function and negative `length`. See the [docs](https://github.com/UltCombo/gulp-buster/#available-configurations) for details.
 
 ## 0.2.0 Multidimensional Configurable Hashing Abyss
 
