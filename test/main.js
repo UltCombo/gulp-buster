@@ -2,10 +2,7 @@
 
 var bust = require('../'),
 	should = require('should'),
-	File = require('gulp-util').File,
-	Buffer = require('buffer').Buffer;
-
-beforeEach(bust._reset);
+	File = require('gulp-util').File;
 
 describe('gulp-buster', function() {
 	var fileContentStr = 'foo',
@@ -25,7 +22,7 @@ describe('gulp-buster', function() {
 
 	describe('Internal', function() {
 		it('should hash a file', function() {
-			bust._hash(fakeFile).should.be.a.String.and.have.property('length').greaterThan(0);
+			bust._hash(fakeFile, bust._assignOptions()).should.be.a.String.and.have.property('length').greaterThan(0);
 		});
 
 		it('should return a path relative to project root', function() {
@@ -44,8 +41,8 @@ describe('gulp-buster', function() {
 
 				newFile.relative.should.equal('output.json');
 				var expectedObj = {};
-				expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = bust._hash(fakeFile);
-				expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = bust._hash(fakeFile2);
+				expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = bust._hash(fakeFile, bust._assignOptions());
+				expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = bust._hash(fakeFile2, bust._assignOptions());
 
 				JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
 				Buffer.isBuffer(newFile.contents).should.equal(true);
@@ -89,31 +86,14 @@ describe('gulp-buster', function() {
 		});
 	});
 
-	describe('.config()', function() {
-		it('should return the configs object', function() {
-			bust.config().should.be.an.Object;
-		});
-
-		it('should accept an object as setter; string as getter', function() {
-			bust.config({ foo: 0, bar: 1 });
-			bust.config('foo').should.equal(0);
-			bust.config('bar').should.equal(1);
-		});
-
-		it('should accept two arguments as setter', function() {
-			bust.config('foo', 'bar');
-			bust.config('foo').should.equal('bar');
-		});
-	});
-
 	describe('config options', function() {
 		describe('fileName', function() {
 			it('should allow setting the default file name', function(done) {
-				bust.config('fileName', 'customName.ext');
+				var fileName = 'customName.ext';
 
-				var stream = bust();
+				var stream = bust({ fileName: fileName });
 				stream.on('data', function(newFile) {
-					newFile.relative.should.equal('customName.ext');
+					newFile.relative.should.equal(fileName);
 					done();
 				});
 				stream.write(fakeFile);
@@ -123,15 +103,14 @@ describe('gulp-buster', function() {
 
 		describe('algo', function() {
 			it('should accept a hashing algorithm name string', function() {
-				bust.config('algo', 'sha1');
-				bust._hash(fakeFile).should.be.a.String.with.lengthOf(40);
+				bust._hash(fakeFile, bust._assignOptions({ algo: 'sha1' })).should.be.a.String.with.lengthOf(40);
 			});
 
 			it('should emit an error when the hashing algorithm is not supported', function(done) {
-				bust.config('algo', 'UltHasher9000');
-				bust._hash(fakeFile).should.be.an.Error;
+				var options = { algo: 'UltHasher9000' };
+				bust._hash(fakeFile, bust._assignOptions(options)).should.be.an.Error;
 
-				var stream = bust();
+				var stream = bust(options);
 				stream.on('error', function() {
 					done();
 				});
@@ -140,18 +119,21 @@ describe('gulp-buster', function() {
 			});
 
 			it('should accept a synchronous function', function() {
-				bust.config('algo', function(file) {
-					(this === undefined).should.be.true;
-					return file.contents.toString();
-				});
-				bust._hash(fakeFile).should.equal(fileContentStr);
+				bust._hash(fakeFile, bust._assignOptions({
+					algo: function(file) {
+						(this === undefined).should.be.true;
+						return file.contents.toString();
+					},
+				})).should.equal(fileContentStr);
 			});
 
 			it('should emit an error when function does not return a string', function(done) {
-				bust.config('algo', function() {});
-				bust._hash(fakeFile).should.be.an.Error;
+				var options = {
+					algo: function() {},
+				};
+				bust._hash(fakeFile, bust._assignOptions(options)).should.be.an.Error;
 
-				var stream = bust();
+				var stream = bust(options);
 				stream.on('error', function() {
 					done();
 				});
@@ -164,28 +146,26 @@ describe('gulp-buster', function() {
 			it('should return leading characters for positive values; trailing for negative', function() {
 				var expectedLength = 6;
 
-				var fullHash = bust._hash(fakeFile);
+				var fullHash = bust._hash(fakeFile, bust._assignOptions());
 				fullHash.length.should.be.greaterThan(expectedLength);
 
-				bust.config('length', expectedLength);
-				bust._hash(fakeFile).should.be.equal(fullHash.slice(0, expectedLength));
-
-				bust.config('length', -expectedLength);
-				bust._hash(fakeFile).should.be.equal(fullHash.slice(-expectedLength));
+				bust._hash(fakeFile, bust._assignOptions({ length: expectedLength })).should.be.equal(fullHash.slice(0, expectedLength));
+				bust._hash(fakeFile, bust._assignOptions({ length: -expectedLength })).should.be.equal(fullHash.slice(-expectedLength));
 			});
 		});
 
 		describe('transform', function() {
 			it('should accept a synchronous function', function(done) {
-				var suffix = '_suffix';
-				bust.config('transform', function(hashes) {
-					(this === undefined).should.be.true;
-					return [hashes[Object.keys(hashes)[0]] + suffix];
-				});
-
-				var stream = bust();
+				var suffix = '_suffix',
+					options = {
+						transform: function(hashes) {
+							(this === undefined).should.be.true;
+							return [hashes[Object.keys(hashes)[0]] + suffix];
+						},
+					},
+					stream = bust(options);
 				stream.on('data', function(newFile) {
-					JSON.parse(newFile.contents.toString())[0].should.equal(bust._hash(fakeFile) + suffix);
+					JSON.parse(newFile.contents.toString())[0].should.equal(bust._hash(fakeFile, bust._assignOptions(options)) + suffix);
 					done();
 				});
 				stream.write(fakeFile);
@@ -195,16 +175,17 @@ describe('gulp-buster', function() {
 
 		describe('formatter', function() {
 			it('should accept a synchronous function', function(done) {
-				bust.config('formatter', function(hashes) {
-					(this === undefined).should.be.true;
-					return Object.keys(hashes).reduce(function(soFar, key) {
-						return soFar + hashes[key];
-					}, '');
-				});
-
-				var stream = bust();
+				var options = {
+					formatter: function(hashes) {
+							(this === undefined).should.be.true;
+							return Object.keys(hashes).reduce(function(soFar, key) {
+								return soFar + hashes[key];
+							}, '');
+						},
+					},
+					stream = bust(options);
 				stream.on('data', function(newFile) {
-					newFile.contents.toString().should.equal(bust._hash(fakeFile));
+					newFile.contents.toString().should.equal(bust._hash(fakeFile, bust._assignOptions(options)));
 					done();
 				});
 				stream.write(fakeFile);
@@ -212,8 +193,9 @@ describe('gulp-buster', function() {
 			});
 
 			it('should emit an error when formatter does not return a string', function(done) {
-				bust.config('formatter', function() {});
-				var stream = bust();
+				var stream = bust({
+					formatter: function() {},
+				});
 				stream.on('error', function() {
 					done();
 				});
