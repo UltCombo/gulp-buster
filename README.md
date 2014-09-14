@@ -65,15 +65,15 @@ gulp.task('default', function() {
 
 - `options` (object|string, optional): the configuration options object. Passing `options` as a string is treated as `{ fileName: options }`.
 
-- `options.fileName` (string): the output filename. Defaults to `'busters.json'`.
+- `options.fileName` (string, optional): the output filename. Defaults to `'busters.json'`.
 
-- `options.algo` (string|function): the hashing algorithm to be used. As a string, it accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). As a function, it takes a [vinyl file](https://github.com/wearefractal/vinyl) as the first argument and must return a string. Defaults to `'md5'`.
+- `options.algo` (string|function, optional): the hashing algorithm to be used. As a string, it accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). As a function, it takes a [vinyl file](https://github.com/wearefractal/vinyl) as the first argument and must return a string. Defaults to `'md5'`.
 
-- `options.length` (number): the maximum length of the hash. Specifying a positive `length` will return the given number of leading characters of the hash, and a negative `length` will return the given number of trailing characters. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
+- `options.length` (number, optional): the maximum length of the hash. Specifying a positive `length` will return the given number of leading characters of the hash, and a negative `length` will return the given number of trailing characters. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
 
-- `options.transform` (function): allows mutating the hashes object, or even creating a completely new data structure, before passing it to the `formatter`. It takes a copy of the hashes object (a plain object in the `filePath: hash` format) as the first argument and must return a value compatible with the `formatter` option. Defaults to passing through the hashes object.
+- `options.transform` (function, optional): allows mutating the hashes object, or even creating a completely new data structure, before passing it to the `formatter`. It takes a copy of the hashes object (a plain object in the `filePath: hash` format) as the first argument and must return a value compatible with the `formatter` option. Defaults to passing through the hashes object.
 
-- `options.formatter` (function): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
+- `options.formatter` (function, optional): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
 
 ## Integrating with Web applications
 
