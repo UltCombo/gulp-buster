@@ -1,14 +1,27 @@
 'use strict';
 
-var PLUGIN_NAME = 'gulp-buster',
-	crypto = require('crypto'),
+var crypto = require('crypto'),
 	path = require('path'),
 	through = require('through'),
 	assign = require('object-assign'),
-	gutil = require('gulp-util');
+	gutil = require('gulp-util'),
+	DEFAULT_OPTIONS = {
+		fileName: 'busters.json',
+		algo: 'md5',
+		length: 0,
+		transform: Object,
+		formatter: JSON.stringify,
+	},
+	OPTION_TYPES = {
+		fileName: ['String'],
+		algo: ['String', 'Function'],
+		length: ['Number'],
+		transform: ['Function'],
+		formatter: ['Function'],
+	};
 
 function error(msg) {
-	return new gutil.PluginError(PLUGIN_NAME, msg);
+	return new gutil.PluginError('gulp-buster', msg);
 }
 
 function hash(file, options) {
@@ -34,15 +47,20 @@ function relativePath(projectPath, filePath) {
 	return path.relative(projectPath, filePath).replace(/\\/g, '/');
 }
 
+function getType(value) {
+	return {}.toString.call(value).slice(8, -1);
+}
+
 function assignOptions(options) {
 	if (typeof options === 'string') options = { fileName: options };
-	return assign({
-		fileName: 'busters.json',
-		algo: 'md5',
-		length: 0,
-		transform: Object,
-		formatter: JSON.stringify,
-	}, options);
+	options = options || {};
+
+	Object.keys(options).forEach(function(option) {
+		if (!OPTION_TYPES.hasOwnProperty(option)) throw error('Unsupported option: ' + option);
+		if (!~OPTION_TYPES[option].indexOf(getType(options[option]))) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
+	});
+
+	return assign({}, DEFAULT_OPTIONS, options);
 }
 
 module.exports = exports = function(options) {
@@ -59,20 +77,13 @@ module.exports = exports = function(options) {
 	}
 
 	function endStream() {
-		var file, content;
+		var content = options.formatter.call(undefined, options.transform.call(undefined, assign({}, hashes)));
+		if (typeof content !== 'string') return this.emit('error', error('Return value of `options.formatter` must be a string'));
 
-		content = options.formatter.call(undefined, options.transform.call(undefined, assign({}, hashes)));
-
-		if (typeof content !== 'string') {
-			return this.emit('error', error('Return value of `options.formatter` must be a string'));
-		}
-
-		file = new gutil.File({
+		this.emit('data', new gutil.File({
 			path: path.join(process.cwd(), options.fileName),
-			contents: new Buffer(content)
-		});
-
-		this.emit('data', file);
+			contents: new Buffer(content),
+		}));
 		this.emit('end');
 	}
 
@@ -80,6 +91,10 @@ module.exports = exports = function(options) {
 };
 
 // for testing. Don't use, may be removed or changed at anytime
-exports._hash = hash;
-exports._relativePath = relativePath;
-exports._assignOptions = assignOptions;
+assign(exports, {
+	_DEFAULT_OPTIONS: DEFAULT_OPTIONS,
+	_hash: hash,
+	_relativePath: relativePath,
+	_getType: getType,
+	_assignOptions: assignOptions,
+});
