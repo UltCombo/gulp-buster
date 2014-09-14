@@ -63,7 +63,7 @@ gulp.task('default', function() {
 
 ### Parameters
 
-- `options` (object|string, optional): the configuration options object. Passing `options` as a string is equivalent to `{ fileName: options }`.
+- `options` (object|string, optional): the configuration options object. Passing `options` as a string is treated as `{ fileName: options }`.
 
 - `options.fileName` (string): the output filename. Defaults to `'busters.json'`.
 
