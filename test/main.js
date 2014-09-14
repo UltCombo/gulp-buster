@@ -54,8 +54,8 @@ describe('gulp-buster', function() {
 		});
 
 		it('should bust two files into different outputs', function(done) {
-			var stream = bust('output1.json'),
-				stream2 = bust('output2.json');
+			var stream = bust(),
+				stream2 = bust();
 
 			var testedOutputs = 0;
 			stream.on('data', function(newFile) {

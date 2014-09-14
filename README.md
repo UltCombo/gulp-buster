@@ -58,49 +58,22 @@ gulp.task('default', function() {
 ## Syntax
 
 ```none
-<through stream> bust([fileName])
+<through stream> bust([options])
 ```
 
 ### Parameters
 
-- `fileName` (string, optional): the output JSON file's name (with extension). The default is `busters.json`, which can also be changed through the `.config()` method (see below).
+- `options` (object|string, optional): the configuration options object. Passing `options` as a string is equivalent to `{ fileName: options }`.
 
-## Configs
+- `options.fileName` (string): the output filename. Defaults to `'busters.json'`.
 
-You can set global configurations such as the hash algorithm and length (as well as the output `fileName`, which is useful when using a custom output filename and multiple entry points, more on that later) by calling the `.config()` method. It is very jQuery-y:
+- `options.algo` (string|function): the hashing algorithm to be used. As a string, it accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). As a function, it takes a [vinyl file](https://github.com/wearefractal/vinyl) as the first argument and must return a string. Defaults to `'md5'`.
 
-```js
-var bust = require('gulp-buster');
+- `options.length` (number): the maximum length of the hash. Specifying a positive `length` will return the given number of leading characters of the hash, and a negative `length` will return the given number of trailing characters. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
 
-// accepts an object as setter
-bust.config({
-	algo: 'sha1',
-	length: 6
-});
+- `options.transform` (function): allows mutating the hashes object, or even creating a completely new data structure, before passing it to the `formatter`. It takes a copy of the hashes object (a plain object in the `filePath: hash` format) as the first argument and must return a value compatible with the `formatter` option. Defaults to passing through the hashes object.
 
-// pass two arguments to set the value for a single config
-bust.config('length', 8);
-
-// and of course, pass a single string to retrieve the given config's value
-var lengthLimit = bust.config('length'); // 8
-
-// pass no arguments to retrieve the current configs object
-var configs = bust.config(); // { fileName: 'busters.json', algo: 'sha1', length: 8 [, ...] }
-// NOTE: this returns a reference to the actual config object, so it is possible (but not advisable)
-// to edit the plugin's configs by assigning to this object's properties.
-```
-
-### Available configurations
-
-- `fileName` (string): the filename to be used when no `fileName` argument is specified in a `bust()` call. Defaults to `'busters.json'`.
-
-- `algo` (string|function): the hashing algorithm to be used. As a string, it accepts the same algorithms as [`crypto.createHash`](http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm). As a function, it takes a [vinyl file](https://github.com/wearefractal/vinyl) as the first argument and must return a string. Defaults to `'md5'`.
-
-- `length` (number): the maximum length of the hash. Specifying a positive `length` will return the given number of leading characters of the hash, and a negative `length` will return the given number of trailing characters. Defaults to `0`, which means no limit (actual length will then depend on the hashing algorithm used). Specifying a length larger than the hash will have no effect.
-
-- `transform` (function): allows mutating the hashes object, or even creating a completely new data structure, before passing it to the `formatter`. It takes a copy of the hashes object (a plain object in the `filePath: hash` format) as the first argument and must return a value compatible with the `formatter` option. Defaults to passing through the hashes object.
-
-- `formatter` (function): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
+- `options.formatter` (function): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
 
 ## Integrating with Web applications
 
@@ -115,13 +88,11 @@ gulp-buster is language-agnostic, thus this part relies on you and your specific
 
 Integration can be easily achieved on any language which supports JSON parsing, in either back-end or front-end. See the [Implementations page](https://github.com/UltCombo/gulp-buster/blob/master/IMPLEMENTATIONS.md) for examples and existing solutions for your language of choice.
 
-**Note:** The output file contents' data structure and format can be customized through the [configuration options](#available-configurations). This enables gulp-buster to output the cache buster hashes file in a suitable native data structure for your target language, as well as allowing to mutate the paths and hashes to suit your specific needs.
+**Note:** The output file contents' data structure and format can be customized through the [configuration options](#parameters). This enables gulp-buster to output the cache buster hashes file in a suitable native data structure for your target language, as well as allowing to mutate the paths and hashes to suit your specific needs.
 
 ## Architecture
 
-gulp-buster groups hashes by the output `fileName`. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file (obviously, you should then set both streams' `.dest()` to the same path in order to don't create duplicated output files). Likewise, in case you'd like two streams' files to have their hashes outputted to different files, you must use different filenames (and set their `.dest()` to your liking).
-
-When gulp-buster is initialized, it creates an empty object which serves as a cache for the generated hashes. This approach's main pros are:
+Each `bust()` call creates a new transform stream associated with a new (empty) object which serves as a cache for the generated hashes of the files that are piped into this stream. This approach's main pros are:
 
 - Allows piping only modified files into gulp-buster, the other hashes are retrieved from the cache when generating the output file;
 - Deleted files' hashes are automatically cleaned on startup, as the hashes cache object starts empty on every startup.
