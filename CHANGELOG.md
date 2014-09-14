@@ -4,7 +4,8 @@
 
 ### Breaking changes
 
-- Removed the undocumented experimental `mode` option, use the new `transform` option instead.
+- Removed the undocumented experimental `mode` configuration option, use the new `transform` configuration option instead.
+- Removed the undocumented `hashes` method.
 
 ### New features
 

@@ -100,10 +100,6 @@ module.exports.config = function(key, value) {
 	}
 };
 
-module.exports.hashes = function() {
-	return hashes;
-};
-
 // for testing. Don't use, may be removed or changed at anytime
 module.exports._hash = hash;
 module.exports._relativePath = relativePath;

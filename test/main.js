@@ -89,20 +89,6 @@ describe('gulp-buster', function() {
 		});
 	});
 
-	describe('.hashes()', function() {
-		it('should return all cached hashes', function(done) {
-			var stream = bust('output1.json');
-			stream.on('end', function() {
-				var hashes = bust.hashes();
-				hashes.should.have.property('output1.json');
-				hashes['output1.json'].should.have.property('test/file.js');
-				done();
-			});
-			stream.write(fakeFile);
-			stream.end();
-		});
-	});
-
 	describe('.config()', function() {
 		it('should return the configs object', function() {
 			bust.config().should.be.an.Object;
