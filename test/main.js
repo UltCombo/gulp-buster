@@ -70,6 +70,10 @@ describe('Internal methods independent of configuration options', function() {
 			bust._assignOptions(fileName).fileName.should.equal(fileName);
 		});
 
+		it('should set options whose value evaluate to `undefined` to their default value', function() {
+			bust._assignOptions({ fileName: undefined }).should.eql(bust._DEFAULT_OPTIONS);
+		});
+
 		it('should throw on unsupported options', function() {
 			bust._assignOptions.bind(undefined, { foo: 0 }).should.throw();
 		});

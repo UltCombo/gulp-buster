@@ -4,6 +4,7 @@ var crypto = require('crypto'),
 	path = require('path'),
 	through = require('through'),
 	assign = require('object-assign'),
+	defaults = require('lodash.defaults'),
 	gutil = require('gulp-util'),
 	Promise = require('bluebird'),
 	DEFAULT_OPTIONS = {
@@ -55,10 +56,10 @@ function assignOptions(options) {
 
 	Object.keys(options).forEach(function(option) {
 		if (!OPTION_TYPES.hasOwnProperty(option)) throw error('Unsupported option: ' + option);
-		if (!~OPTION_TYPES[option].indexOf(getType(options[option]))) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
+		if (options[option] !== undefined && !~OPTION_TYPES[option].indexOf(getType(options[option]))) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
 	});
 
-	return assign({}, DEFAULT_OPTIONS, options);
+	return defaults(options, DEFAULT_OPTIONS);
 }
 
 module.exports = exports = function(options) {

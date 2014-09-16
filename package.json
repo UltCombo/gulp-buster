@@ -27,6 +27,7 @@
   "dependencies": {
     "bluebird": "^2.3.2",
     "gulp-util": "^3.0.1",
+    "lodash.defaults": "^2.4.1",
     "object-assign": "^1.0.0",
     "through": "^2.3.4"
   },
