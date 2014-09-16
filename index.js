@@ -59,7 +59,7 @@ function assignOptions(options) {
 		if (options[option] !== undefined && !~OPTION_TYPES[option].indexOf(getType(options[option]))) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
 	});
 
-	return defaults(options, DEFAULT_OPTIONS);
+	return defaults({}, options, DEFAULT_OPTIONS);
 }
 
 module.exports = exports = function(options) {
