@@ -25,7 +25,8 @@
     "url": "https://github.com/UltCombo/gulp-buster.git"
   },
   "dependencies": {
-    "gulp-util": "^3.0.0",
+    "bluebird": "^2.3.2",
+    "gulp-util": "^3.0.1",
     "object-assign": "^1.0.0",
     "through": "^2.3.4"
   },
@@ -37,7 +38,7 @@
     "url": "https://github.com/UltCombo/gulp-buster/issues"
   },
   "devDependencies": {
-    "mocha": "^1.18",
+    "mocha": "^1.21.4",
     "should": "^4.0"
   },
   "scripts": {

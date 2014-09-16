@@ -5,6 +5,7 @@ var crypto = require('crypto'),
 	through = require('through'),
 	assign = require('object-assign'),
 	gutil = require('gulp-util'),
+	Promise = require('bluebird'),
 	DEFAULT_OPTIONS = {
 		fileName: 'busters.json',
 		algo: 'md5',
@@ -25,22 +26,18 @@ function error(msg) {
 }
 
 function hash(file, options) {
-	var ret;
-	if (typeof options.algo === 'function') {
-		ret = options.algo.call(undefined, file);
-		if (typeof ret !== 'string') return error('Return value of `options.algo` must be a string');
-	} else try {
-		ret = crypto.createHash(options.algo).update(file.contents.toString()).digest('hex');
-	} catch(e) {
-		return error(e.message);
-	}
+	return typeof options.algo === 'function'
+		? options.algo.call(undefined, file)
+		: crypto.createHash(options.algo).update(file.contents.toString()).digest('hex');
+}
 
+function sliceHash(hash, options) {
 	// positive length = leading characters; negative = trailing
 	return options.length
 		? options.length > 0
-			? ret.slice(0, options.length)
-			: ret.slice(options.length)
-		: ret;
+			? hash.slice(0, options.length)
+			: hash.slice(options.length)
+		: hash;
 }
 
 function relativePath(projectPath, filePath) {
@@ -65,26 +62,39 @@ function assignOptions(options) {
 
 module.exports = exports = function(options) {
 	options = assignOptions(options);
-	var hashes = {};
+	var hashes = {},
+		hashingPromises = [];
 
 	function hashFile(file) {
 		if (file.isNull()) return; // ignore
 		if (file.isStream()) return this.emit('error', error('Streaming not supported'));
 
-		var result = hash(file, options);
-		if (result instanceof gutil.PluginError) return this.emit('error', result);
-		hashes[relativePath(file.cwd, file.path)] = result;
+		// start hashing files as soon as they are received for maximum concurrency
+		hashingPromises.push(
+			Promise.try(hash.bind(undefined, file, options)).then(function(hashed) {
+				if (typeof hashed !== 'string') throw error('Return/fulfill value of `options.algo` must be a string');
+				hashes[relativePath(file.cwd, file.path)] = sliceHash(hashed, options);
+			})
+		);
 	}
 
 	function endStream() {
-		var content = options.formatter.call(undefined, options.transform.call(undefined, assign({}, hashes)));
-		if (typeof content !== 'string') return this.emit('error', error('Return value of `options.formatter` must be a string'));
+		Promise.all(hashingPromises).bind(this).then(function() {
+			return options.transform.call(undefined, assign({}, hashes));
+		}).then(function(transformed) {
+			return options.formatter.call(undefined, transformed);
+		}).then(function(formatted) {
+			if (typeof formatted !== 'string') throw error('Return/fulfill value of `options.formatter` must be a string');
 
-		this.emit('data', new gutil.File({
-			path: path.join(process.cwd(), options.fileName),
-			contents: new Buffer(content),
-		}));
-		this.emit('end');
+			this.emit('data', new gutil.File({
+				path: path.join(process.cwd(), options.fileName),
+				contents: new Buffer(formatted),
+			}));
+			this.emit('end');
+		}).catch(function(err) {
+			// TODO review error emission/rethrowing once https://github.com/gulpjs/gulp/issues/685 is settled
+			this.emit('error', err instanceof gutil.PluginError ? err : error(err));
+		});
 	}
 
 	return through(hashFile, endStream);
@@ -92,7 +102,9 @@ module.exports = exports = function(options) {
 
 // for testing. Don't use, may be removed or changed at anytime
 assign(exports, {
+	_Promise: Promise,
 	_DEFAULT_OPTIONS: DEFAULT_OPTIONS,
+	_error: error,
 	_hash: hash,
 	_relativePath: relativePath,
 	_getType: getType,

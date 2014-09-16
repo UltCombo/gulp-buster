@@ -75,6 +75,8 @@ gulp.task('default', function() {
 
 - `options.formatter` (function, optional): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
 
+**Note:** all of the options which accept a function can be run asynchronously by returning a Promise (or *thenable*). If the given option has a return value constraint, the constraint will still be applied to the promise's fulfillment value.
+
 ## Integrating with Web applications
 
 gulp-buster is language-agnostic, thus this part relies on you and your specific use case. By default, gulp-buster generates a JSON file in the following format:
