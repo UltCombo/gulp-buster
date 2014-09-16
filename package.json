@@ -1,6 +1,6 @@
 {
   "name": "gulp-buster",
-  "description": "Cache buster hashes generator for gulp",
+  "description": "Cache buster hashes generator for gulp. Blazing fast and fully configurable.",
   "version": "0.2.2",
   "author": {
     "name": "Ult Combo",

@@ -4,7 +4,7 @@
 [![Dependency Status](https://david-dm.org/UltCombo/gulp-buster.png)](https://david-dm.org/UltCombo/gulp-buster)
 [![devDependency Status](https://david-dm.org/UltCombo/gulp-buster/dev-status.png)](https://david-dm.org/UltCombo/gulp-buster#info=devDependencies)
 
-Cache buster hashes generator for gulp
+Cache buster hashes generator for gulp. Blazing fast and fully configurable.
 
 ## What is cache busting?
 
