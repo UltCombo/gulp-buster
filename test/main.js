@@ -17,7 +17,11 @@ var bust = require('..'),
 		base: '/home/contra/test',
 		path: '/home/contra/test/file2.js',
 		contents: new Buffer(fileContentStr2),
-	});
+	}),
+	fakeFileBustPath = bust._relativePath(fakeFile.cwd, fakeFile.path),
+	fakeFileBustPath2 = bust._relativePath(fakeFile2.cwd, fakeFile2.path),
+	fakeFileHash = bust._hash(fakeFile, bust._DEFAULT_OPTIONS),
+	fakeFileHash2 = bust._hash(fakeFile2, bust._DEFAULT_OPTIONS);
 
 describe('Internal methods independent of configuration options', function() {
 	describe('_error()', function() {
@@ -74,7 +78,7 @@ describe('Internal methods independent of configuration options', function() {
 });
 
 describe('Core', function() {
-	it('should bust two files into the same output', function(done) {
+	it('should bust two files into the same output file in the same stream', function(done) {
 		var stream = bust();
 		stream.on('data', function(newFile) {
 			should.exist(newFile);
@@ -84,19 +88,18 @@ describe('Core', function() {
 
 			newFile.relative.should.equal('busters.json');
 			var expectedObj = {};
-			expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = bust._hash(fakeFile, bust._assignOptions());
-			expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = bust._hash(fakeFile2, bust._assignOptions());
+			expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = fakeFileHash;
+			expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = fakeFileHash2;
 
 			JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
 			Buffer.isBuffer(newFile.contents).should.be.true;
 			done();
 		});
 		stream.write(fakeFile);
-		stream.write(fakeFile2);
-		stream.end();
+		stream.end(fakeFile2);
 	});
 
-	it('should bust two files into different outputs', function(done) {
+	it('should bust two files into different output files in different streams', function(done) {
 		var stream = bust(),
 			stream2 = bust(),
 			testedOutputs = 0;
@@ -113,10 +116,8 @@ describe('Core', function() {
 			should.exist(obj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)]);
 			if (++testedOutputs === 2) done();
 		});
-		stream.write(fakeFile);
-		stream.end();
-		stream2.write(fakeFile2);
-		stream2.end();
+		stream.end(fakeFile);
+		stream2.end(fakeFile2);
 	});
 
 	it('should return an empty hashes object file when receiving an empty buffers stream', function(done) {
@@ -139,8 +140,7 @@ describe('Configuration options', function() {
 				newFile.relative.should.equal(fileName);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 	});
 
@@ -148,12 +148,10 @@ describe('Configuration options', function() {
 		it('should accept a hashing algorithm name string', function(done) {
 			var stream = bust({ algo: 'sha1' });
 			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				obj[Object.keys(obj)[0]].should.be.a.String.with.lengthOf(40);
+				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.a.String.with.lengthOf(40);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should emit an error when the hashing algorithm is not supported', function(done) {
@@ -161,8 +159,7 @@ describe('Configuration options', function() {
 			stream.on('error', function() {
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should accept a synchronous function', function(done) {
@@ -173,12 +170,10 @@ describe('Configuration options', function() {
 					},
 				});
 			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				obj[Object.keys(obj)[0]].should.equal(fileContentStr);
+				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.equal(fileContentStr);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -193,12 +188,10 @@ describe('Configuration options', function() {
 					},
 				});
 			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				obj[Object.keys(obj)[0]].should.equal(fileContentStr);
+				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.equal(fileContentStr);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should emit an error when function does not return a string or promise', function(done) {
@@ -207,8 +200,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
@@ -221,42 +213,35 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 	});
 
 	describe('length', function() {
 		it('should return leading characters for positive values', function(done) {
 			var expectedLength = 6,
-				fullHash = bust._hash(fakeFile, bust._assignOptions()),
 				stream = bust({ length: expectedLength });
 
-			fullHash.length.should.be.greaterThan(expectedLength);
+			fakeFileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				obj[Object.keys(obj)[0]].should.be.equal(fullHash.slice(0, expectedLength));
+				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.equal(fakeFileHash.slice(0, expectedLength));
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should return trailing characters for negative values', function(done) {
 			var expectedLength = 6,
-				fullHash = bust._hash(fakeFile, bust._assignOptions()),
 				stream = bust({ length: -expectedLength });
 
-			fullHash.length.should.be.greaterThan(expectedLength);
+			fakeFileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				var obj = JSON.parse(newFile.contents.toString());
-				obj[Object.keys(obj)[0]].should.be.equal(fullHash.slice(-expectedLength));
+				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.equal(fakeFileHash.slice(-expectedLength));
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 	});
 
@@ -266,16 +251,15 @@ describe('Configuration options', function() {
 				options = {
 					transform: function(hashes) {
 						(this === undefined).should.be.true;
-						return [hashes[Object.keys(hashes)[0]] + suffix];
+						return [hashes[fakeFileBustPath] + suffix];
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(bust._hash(fakeFile, bust._assignOptions(options)) + suffix);
+				JSON.parse(newFile.contents.toString())[0].should.equal(fakeFileHash + suffix);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -285,18 +269,17 @@ describe('Configuration options', function() {
 						(this === undefined).should.be.true;
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
-								fulfill([hashes[Object.keys(hashes)[0]] + suffix]);
+								fulfill([hashes[fakeFileBustPath] + suffix]);
 							}, 0);
 						});
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(bust._hash(fakeFile, bust._assignOptions(options)) + suffix);
+				JSON.parse(newFile.contents.toString())[0].should.equal(fakeFileHash + suffix);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 	});
 
@@ -305,16 +288,15 @@ describe('Configuration options', function() {
 			var options = {
 					formatter: function(hashes) {
 						(this === undefined).should.be.true;
-						return hashes[Object.keys(hashes)[0]];
+						return hashes[fakeFileBustPath];
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				newFile.contents.toString().should.equal(bust._hash(fakeFile, bust._assignOptions(options)));
+				newFile.contents.toString().should.equal(fakeFileHash);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -323,18 +305,17 @@ describe('Configuration options', function() {
 						(this === undefined).should.be.true;
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
-								fulfill(hashes[Object.keys(hashes)[0]]);
+								fulfill(hashes[fakeFileBustPath]);
 							}, 0);
 						});
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				newFile.contents.toString().should.equal(bust._hash(fakeFile, bust._assignOptions(options)));
+				newFile.contents.toString().should.equal(fakeFileHash);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should emit an error when function does not return a string or promise', function(done) {
@@ -343,8 +324,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
@@ -357,8 +337,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.write(fakeFile);
-			stream.end();
+			stream.end(fakeFile);
 		});
 	});
 });
