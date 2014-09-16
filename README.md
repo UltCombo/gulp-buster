@@ -34,24 +34,26 @@ npm install --save-dev gulp-buster
 
 ## How to use
 
-gulp-buster can be used standalone as part of a build task, or in conjunction with [`gulp-watch`](https://npmjs.org/package/gulp-watch) to update the cache buster hashes as the files are modified.
+gulp-buster can be used standalone as part of a build task, or in conjunction with [gulp-watch](https://npmjs.org/package/gulp-watch) to update the cache buster hashes as the files are modified.
 
-Example with `gulp-watch`:
+Example with gulp-watch `^1.0.5` and gulp-ruby-sass (compile, bust and watch for changes):
 
 ```js
 var gulp = require('gulp'),
 	watch = require('gulp-watch'),
+	sass = require('gulp-ruby-sass'),
 	bust = require('gulp-buster');
 
 gulp.task('default', function() {
-	return gulp.src([
-		'**/*.min.js',
-		'css/*.css'
-		]).pipe(watch(function(files) {
+    var srcGlob = 'scss/*.scss';
+	return gulp.src(srcGlob)
+		.pipe(watch(srcGlob, function(files) {
 			return files
-				.pipe(bust('busters.json')) // the output filename
-				.pipe(gulp.dest('.')); // output file to project root
-		}));
+				.pipe(sass())
+				.pipe(gulp.dest('css'))
+				.pipe(bust())
+				.pipe(gulp.dest('.'));
+	}));
 });
 ```
 
@@ -94,10 +96,11 @@ Integration can be easily achieved on any language which supports JSON parsing, 
 
 ## Architecture
 
-Each `bust()` call creates a new transform stream associated with a new (empty) object which serves as a cache for the generated hashes of the files that are piped into this stream. This approach's main pros are:
+When gulp-buster is initialized, it creates an empty object which serves as a cache for the generated hashes. Generated hashes are then grouped by the `options.fileName` parameter. That means, piping two different streams into `bust('foo.json')` will merge both of those streams' files' hashes into the same output file. This approach's main pros are:
 
 - Allows piping only modified files into gulp-buster, the other hashes are retrieved from the cache when generating the output file;
-- Deleted files' hashes are automatically cleaned on startup, as the hashes cache object starts empty on every startup.
+- Deleted files' hashes are automatically cleaned on startup, as the hashes cache object starts empty on every startup;
+- Although this feature is very similar to [gulp-remember](https://github.com/ahaurw01/gulp-remember), gulp-buster's hashes cache is much more efficient. Using gulp-remember would cause all of the files that have ever went through the stream to be re-hashed whenever piping any new file, unlike gulp-buster's hashes cache which allows hashing only the files that are piped into gulp-buster.
 
 There are close to no cons, the only notable drawback is that all the to-be-busted files must be piped into gulp-buster (preferably at startup) before it generates the output file with all hashes that you'd expect. A feature to allow inputting an already-generated hashes file was considered in order to avoid having to pipe all the to-be-busted files at startup, but that seems to bring more cons than pros -- the auto-cleanup of deleted files' hashes would no longer happen, outdated hashes could stay in the output hashes file if the to-be-busted files were edited while gulp was not running, and finally it'd also be incompatible with the `transform` and `formatter` features.
 

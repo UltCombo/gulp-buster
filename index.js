@@ -19,7 +19,8 @@ var crypto = require('crypto'),
 		length: ['Number'],
 		transform: ['Function'],
 		formatter: ['Function'],
-	};
+	},
+	hashesStore = {}; // options.fileName: { relativePath: hash }
 
 function error(msg) {
 	return new gutil.PluginError('gulp-buster', msg);
@@ -62,7 +63,7 @@ function assignOptions(options) {
 
 module.exports = exports = function(options) {
 	options = assignOptions(options);
-	var hashes = {},
+	var hashes = hashesStore[options.fileName] = hashesStore[options.fileName] || {},
 		hashingPromises = [];
 
 	function hashFile(file) {
@@ -109,4 +110,7 @@ assign(exports, {
 	_relativePath: relativePath,
 	_getType: getType,
 	_assignOptions: assignOptions,
+	_reset: function() {
+		hashesStore = {};
+	},
 });

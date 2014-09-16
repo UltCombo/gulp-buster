@@ -5,7 +5,6 @@
 ### Breaking changes
 
 - The `config` method has been removed, you can now pass a configuration options object in the `bust()` call. See the [docs](https://github.com/UltCombo/gulp-buster/#syntax) for details.
-- Hashes are no longer grouped by the `fileName` option. Use a [`merge-stream` approach](https://github.com/gulpjs/gulp/blob/master/docs/recipes/using-multiple-sources-in-one-task.md) instead.
 - Removed the undocumented experimental `mode` option, use the new `transform` option instead.
 - Removed the undocumented `hashes` method.
 

@@ -1,7 +1,6 @@
 'use strict';
 
 var bust = require('..'),
-	should = require('should'),
 	assign = require('object-assign'),
 	gutil = require('gulp-util'),
 	fileContentStr = 'foo',
@@ -22,6 +21,10 @@ var bust = require('..'),
 	fakeFileBustPath2 = bust._relativePath(fakeFile2.cwd, fakeFile2.path),
 	fakeFileHash = bust._hash(fakeFile, bust._DEFAULT_OPTIONS),
 	fakeFileHash2 = bust._hash(fakeFile2, bust._DEFAULT_OPTIONS);
+
+require('should');
+
+beforeEach(bust._reset);
 
 describe('Internal methods independent of configuration options', function() {
 	describe('_error()', function() {
@@ -81,15 +84,15 @@ describe('Core', function() {
 	it('should bust two files into the same output file in the same stream', function(done) {
 		var stream = bust();
 		stream.on('data', function(newFile) {
-			should.exist(newFile);
-			should.exist(newFile.path);
-			should.exist(newFile.relative);
-			should.exist(newFile.contents);
+			newFile.should.be.an.instanceOf(gutil.File);
+			newFile.should.have.property('path');
+			newFile.should.have.property('relative');
+			newFile.should.have.property('contents');
 
 			newFile.relative.should.equal('busters.json');
 			var expectedObj = {};
-			expectedObj[bust._relativePath(fakeFile.cwd, fakeFile.path)] = fakeFileHash;
-			expectedObj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)] = fakeFileHash2;
+			expectedObj[fakeFileBustPath] = fakeFileHash;
+			expectedObj[fakeFileBustPath2] = fakeFileHash2;
 
 			JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
 			Buffer.isBuffer(newFile.contents).should.be.true;
@@ -100,22 +103,42 @@ describe('Core', function() {
 	});
 
 	it('should bust two files into different output files in different streams', function(done) {
-		var stream = bust(),
-			stream2 = bust(),
+		var stream = bust('output1.json'),
+			stream2 = bust('output2.json'),
 			testedOutputs = 0;
 
 		stream.on('data', function(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
-			should.exist(obj[bust._relativePath(fakeFile.cwd, fakeFile.path)]);
-			should.not.exist(obj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)]);
+			obj.should.have.property(fakeFileBustPath);
+			obj.should.not.have.property(fakeFileBustPath2);
 			if (++testedOutputs === 2) done();
 		});
 		stream2.on('data', function(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
-			should.not.exist(obj[bust._relativePath(fakeFile.cwd, fakeFile.path)]);
-			should.exist(obj[bust._relativePath(fakeFile2.cwd, fakeFile2.path)]);
+			obj.should.not.have.property(fakeFileBustPath);
+			obj.should.have.property(fakeFileBustPath2);
 			if (++testedOutputs === 2) done();
 		});
+		stream.end(fakeFile);
+		stream2.end(fakeFile2);
+	});
+
+	it('should bust two files into the same output file in different streams', function(done) {
+		var stream = bust('output.json'),
+			stream2 = bust('output.json'),
+			testedOutputs = 0;
+
+		function runAssertion(newFile) {
+			var obj = JSON.parse(newFile.contents.toString());
+			obj.should.have.property(fakeFileBustPath);
+			obj.should.have.property(fakeFileBustPath2);
+			done();
+		}
+		function onData() {
+			if (++testedOutputs === 2) runAssertion.apply(this, arguments);
+		}
+		stream.on('data', onData);
+		stream2.on('data', onData);
 		stream.end(fakeFile);
 		stream2.end(fakeFile2);
 	});
