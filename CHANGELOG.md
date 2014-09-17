@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED
+## 1.0.0 The Promised Hashing
 
 ### Breaking changes
 
@@ -11,12 +11,13 @@
 ### New features
 
 - Configuration options: added new `formatter` and `transform` options, added support for `algo` as a function and negative `length`. See the [docs](https://github.com/UltCombo/gulp-buster/#parameters) for details.
+- All of the configuration options which accept a function can be run asynchronously by returning a promise.
 - Added type validation for configuration options.
 
 ## 0.2.0 Multidimensional Configurable Hashing Abyss
 
-- `fileName` parameter is now optional and defaults to `busters.json`;
-- Allow multiple different output files in the same script (hashes are grouped by output filename);
+- `fileName` parameter is now optional and defaults to `busters.json`.
+- Allow multiple different output files in the same script (hashes are grouped by output filename).
 - Added `.config()` method to allow customizing the hashing algorithm, hash length and default output filename.
 
 ### Patch releases

@@ -36,7 +36,7 @@ npm install --save-dev gulp-buster
 
 gulp-buster can be used standalone as part of a build task, or in conjunction with [gulp-watch](https://npmjs.org/package/gulp-watch) to update the cache buster hashes as the files are modified.
 
-Example with gulp-watch `^1.0.5` and gulp-ruby-sass (compile, bust and watch for changes):
+Example with gulp-watch `^1.0.5` and gulp-ruby-sass `^0.7.1` (compile, bust and watch for changes):
 
 ```js
 var gulp = require('gulp'),
@@ -77,7 +77,7 @@ gulp.task('default', function() {
 
 - `options.formatter` (function, optional): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
 
-**Note:** all of the options which accept a function can be run asynchronously by returning a Promise (or *thenable*). If the given option has a return value constraint, the constraint will still be applied to the promise's fulfillment value.
+**Note:** all of the options which accept a function can be run asynchronously by returning a promise (or *thenable*). If the given option has a return value constraint, the constraint will still be applied to the promise's fulfillment value.
 
 ## Integrating with Web applications
 

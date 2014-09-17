@@ -94,7 +94,6 @@ module.exports = exports = function(options) {
 			}));
 			this.emit('end');
 		}).catch(function(err) {
-			// TODO review error emission/rethrowing once https://github.com/gulpjs/gulp/issues/685 is settled
 			this.emit('error', err instanceof gutil.PluginError ? err : error(err));
 		});
 	}
