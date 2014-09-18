@@ -45,7 +45,7 @@ var gulp = require('gulp'),
 	bust = require('gulp-buster');
 
 gulp.task('default', function() {
-    var srcGlob = 'scss/*.scss';
+	var srcGlob = 'scss/*.scss';
 	return gulp.src(srcGlob)
 		.pipe(watch(srcGlob, function(files) {
 			return files
