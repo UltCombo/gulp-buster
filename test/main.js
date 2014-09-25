@@ -26,7 +26,7 @@ require('should');
 
 beforeEach(bust._reset);
 
-describe('Internal methods independent of configuration options', function() {
+describe('Configuration-independent internal methods', function() {
 	describe('_error()', function() {
 		it('should return an instance of PluginError', function() {
 			bust._error('err').should.be.an.instanceOf(gutil.PluginError);
