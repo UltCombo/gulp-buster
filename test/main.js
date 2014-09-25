@@ -165,7 +165,7 @@ describe('Core', function() {
 
 describe('Configuration options', function() {
 	describe('fileName', function() {
-		it('should allow setting the default file name', function(done) {
+		it('should allow setting the output file name', function(done) {
 			var fileName = 'customName.ext';
 
 			var stream = bust({ fileName: fileName });
