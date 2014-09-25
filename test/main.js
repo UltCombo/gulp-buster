@@ -4,23 +4,23 @@ var bust = require('..'),
 	assign = require('object-assign'),
 	gutil = require('gulp-util'),
 	fileContentStr = 'foo',
-	fileContentStr2 = 'bar',
-	fakeFile = new gutil.File({
-		cwd: '/home/contra/',
-		base: '/home/contra/test',
-		path: '/home/contra/test/file.js',
+	file2ContentStr = 'bar',
+	file = new gutil.File({
+		cwd: 'C:/users/ult/',
+		base: 'C:/users/ult/test',
+		path: 'C:/users/ult/test/file.js',
 		contents: new Buffer(fileContentStr),
 	}),
-	fakeFile2 = new gutil.File({
-		cwd: '/home/contra/',
-		base: '/home/contra/test',
-		path: '/home/contra/test/file2.js',
-		contents: new Buffer(fileContentStr2),
+	file2 = new gutil.File({
+		cwd: 'C:/users/ult/',
+		base: 'C:/users/ult/test',
+		path: 'C:/users/ult/test/file2.js',
+		contents: new Buffer(file2ContentStr),
 	}),
-	fakeFileBustPath = bust._relativePath(fakeFile.cwd, fakeFile.path),
-	fakeFileBustPath2 = bust._relativePath(fakeFile2.cwd, fakeFile2.path),
-	fakeFileHash = bust._hash(fakeFile, bust._DEFAULT_OPTIONS),
-	fakeFileHash2 = bust._hash(fakeFile2, bust._DEFAULT_OPTIONS);
+	fileBustPath = bust._relativePath(file.cwd, file.path),
+	file2BustPath = bust._relativePath(file2.cwd, file2.path),
+	fileHash = bust._hash(file, bust._DEFAULT_OPTIONS),
+	file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS);
 
 require('should');
 
@@ -101,15 +101,15 @@ describe('Core', function() {
 
 			newFile.relative.should.equal('busters.json');
 			var expectedObj = {};
-			expectedObj[fakeFileBustPath] = fakeFileHash;
-			expectedObj[fakeFileBustPath2] = fakeFileHash2;
+			expectedObj[fileBustPath] = fileHash;
+			expectedObj[file2BustPath] = file2Hash;
 
 			JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
 			Buffer.isBuffer(newFile.contents).should.be.true;
 			done();
 		});
-		stream.write(fakeFile);
-		stream.end(fakeFile2);
+		stream.write(file);
+		stream.end(file2);
 	});
 
 	it('should bust two files into different output files in different streams', function(done) {
@@ -119,18 +119,18 @@ describe('Core', function() {
 
 		stream.on('data', function(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
-			obj.should.have.property(fakeFileBustPath);
-			obj.should.not.have.property(fakeFileBustPath2);
+			obj.should.have.property(fileBustPath);
+			obj.should.not.have.property(file2BustPath);
 			if (++testedOutputs === 2) done();
 		});
 		stream2.on('data', function(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
-			obj.should.not.have.property(fakeFileBustPath);
-			obj.should.have.property(fakeFileBustPath2);
+			obj.should.not.have.property(fileBustPath);
+			obj.should.have.property(file2BustPath);
 			if (++testedOutputs === 2) done();
 		});
-		stream.end(fakeFile);
-		stream2.end(fakeFile2);
+		stream.end(file);
+		stream2.end(file2);
 	});
 
 	it('should bust two files into the same output file in different streams', function(done) {
@@ -140,8 +140,8 @@ describe('Core', function() {
 
 		function runAssertion(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
-			obj.should.have.property(fakeFileBustPath);
-			obj.should.have.property(fakeFileBustPath2);
+			obj.should.have.property(fileBustPath);
+			obj.should.have.property(file2BustPath);
 			done();
 		}
 		function onData() {
@@ -149,8 +149,8 @@ describe('Core', function() {
 		}
 		stream.on('data', onData);
 		stream2.on('data', onData);
-		stream.end(fakeFile);
-		stream2.end(fakeFile2);
+		stream.end(file);
+		stream2.end(file2);
 	});
 
 	it('should return an empty hashes object file when receiving an empty buffers stream', function(done) {
@@ -173,7 +173,7 @@ describe('Configuration options', function() {
 				newFile.relative.should.equal(fileName);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 	});
 
@@ -181,10 +181,10 @@ describe('Configuration options', function() {
 		it('should accept a hashing algorithm name string', function(done) {
 			var stream = bust({ algo: 'sha1' });
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.a.String.with.lengthOf(40);
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.be.a.String.with.lengthOf(40);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should emit an error when the hashing algorithm is not supported', function(done) {
@@ -192,7 +192,7 @@ describe('Configuration options', function() {
 			stream.on('error', function() {
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should accept a synchronous function', function(done) {
@@ -203,10 +203,10 @@ describe('Configuration options', function() {
 					},
 				});
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.equal(fileContentStr);
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -221,10 +221,10 @@ describe('Configuration options', function() {
 					},
 				});
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.equal(fileContentStr);
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should emit an error when function does not return a string or promise', function(done) {
@@ -233,7 +233,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
@@ -246,7 +246,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 	});
 
@@ -255,26 +255,26 @@ describe('Configuration options', function() {
 			var expectedLength = 6,
 				stream = bust({ length: expectedLength });
 
-			fakeFileHash.length.should.be.greaterThan(expectedLength);
+			fileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.equal(fakeFileHash.slice(0, expectedLength));
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileHash.slice(0, expectedLength));
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should return trailing characters for negative values', function(done) {
 			var expectedLength = 6,
 				stream = bust({ length: -expectedLength });
 
-			fakeFileHash.length.should.be.greaterThan(expectedLength);
+			fileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fakeFileBustPath].should.be.equal(fakeFileHash.slice(-expectedLength));
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileHash.slice(-expectedLength));
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 	});
 
@@ -284,15 +284,15 @@ describe('Configuration options', function() {
 				options = {
 					transform: function(hashes) {
 						(this === undefined).should.be.true;
-						return [hashes[fakeFileBustPath] + suffix];
+						return [hashes[fileBustPath] + suffix];
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(fakeFileHash + suffix);
+				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -302,17 +302,17 @@ describe('Configuration options', function() {
 						(this === undefined).should.be.true;
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
-								fulfill([hashes[fakeFileBustPath] + suffix]);
+								fulfill([hashes[fileBustPath] + suffix]);
 							}, 0);
 						});
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(fakeFileHash + suffix);
+				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 	});
 
@@ -321,15 +321,15 @@ describe('Configuration options', function() {
 			var options = {
 					formatter: function(hashes) {
 						(this === undefined).should.be.true;
-						return hashes[fakeFileBustPath];
+						return hashes[fileBustPath];
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				newFile.contents.toString().should.equal(fakeFileHash);
+				newFile.contents.toString().should.equal(fileHash);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should accept an asynchronous function', function(done) {
@@ -338,17 +338,17 @@ describe('Configuration options', function() {
 						(this === undefined).should.be.true;
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
-								fulfill(hashes[fakeFileBustPath]);
+								fulfill(hashes[fileBustPath]);
 							}, 0);
 						});
 					},
 				},
 				stream = bust(options);
 			stream.on('data', function(newFile) {
-				newFile.contents.toString().should.equal(fakeFileHash);
+				newFile.contents.toString().should.equal(fileHash);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should emit an error when function does not return a string or promise', function(done) {
@@ -357,7 +357,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
@@ -370,7 +370,7 @@ describe('Configuration options', function() {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
 			});
-			stream.end(fakeFile);
+			stream.end(file);
 		});
 	});
 });
