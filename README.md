@@ -1,8 +1,8 @@
 # [gulp](https://github.com/gulpjs/gulp/)-buster
-[![NPM version](https://badge.fury.io/js/gulp-buster.png)](https://npmjs.org/package/gulp-buster)
-[![Build Status](https://travis-ci.org/UltCombo/gulp-buster.png?branch=master)](https://travis-ci.org/UltCombo/gulp-buster)
-[![Dependency Status](https://david-dm.org/UltCombo/gulp-buster.png)](https://david-dm.org/UltCombo/gulp-buster)
-[![devDependency Status](https://david-dm.org/UltCombo/gulp-buster/dev-status.png)](https://david-dm.org/UltCombo/gulp-buster#info=devDependencies)
+[![NPM version](http://img.shields.io/npm/v/gulp-buster.svg)](https://npmjs.org/package/gulp-buster)
+[![Build Status](http://img.shields.io/travis/UltCombo/gulp-buster.svg)](https://travis-ci.org/UltCombo/gulp-buster)
+[![Dependency Status](http://img.shields.io/david/UltCombo/gulp-buster.svg)](https://david-dm.org/UltCombo/gulp-buster)
+[![devDependency Status](http://img.shields.io/david/dev/UltCombo/gulp-buster.svg)](https://david-dm.org/UltCombo/gulp-buster#info=devDependencies)
 
 Cache buster hashes generator for gulp. Blazing fast and fully configurable.
 
@@ -51,8 +51,8 @@ gulp.task('default', function() {
 			return files
 				.pipe(sass())
 				.pipe(gulp.dest('css'))
-				.pipe(bust())
-				.pipe(gulp.dest('.'));
+				.pipe(bust())           // pipe generated files into gulp-buster
+				.pipe(gulp.dest('.'));  // output busters.json to project root
 	}));
 });
 ```
