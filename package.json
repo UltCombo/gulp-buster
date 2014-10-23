@@ -39,7 +39,7 @@
     "url": "https://github.com/UltCombo/gulp-buster/issues"
   },
   "devDependencies": {
-    "mocha": "^1.21.4",
+    "mocha": "^2.0.0",
     "should": "^4.0"
   },
   "scripts": {
