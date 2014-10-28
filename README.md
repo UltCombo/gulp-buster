@@ -1,5 +1,5 @@
 # [gulp](https://github.com/gulpjs/gulp/)-buster
-[![NPM version](http://img.shields.io/npm/v/gulp-buster.svg)](https://npmjs.org/package/gulp-buster)
+[![npm version](http://img.shields.io/npm/v/gulp-buster.svg)](https://npmjs.org/package/gulp-buster)
 [![Build Status](http://img.shields.io/travis/UltCombo/gulp-buster.svg)](https://travis-ci.org/UltCombo/gulp-buster)
 [![Coverage Status](https://img.shields.io/coveralls/UltCombo/gulp-buster.svg)](https://coveralls.io/r/UltCombo/gulp-buster)
 [![Dependency Status](http://img.shields.io/david/UltCombo/gulp-buster.svg)](https://david-dm.org/UltCombo/gulp-buster)
