@@ -7,6 +7,7 @@ First off, if you are planning to make your own gulp-buster implementation, chec
 ### PHP
 
 - [BustersPhp](https://github.com/mikedfunk/BustersPhp)
+- [GulpBusterBundle](https://github.com/ajaxray/GulpBusterBundle) (for Symfony 2)
 
 ## Submit your own implementation
 
