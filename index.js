@@ -30,7 +30,7 @@ function error(msg) {
 function hash(file, options) {
 	return typeof options.algo === 'function'
 		? options.algo.call(undefined, file)
-		: crypto.createHash(options.algo).update(file.contents.toString()).digest('hex');
+		: crypto.createHash(options.algo).update(file.contents, 'binary').digest('hex');
 }
 
 function sliceHash(hash, options) {
