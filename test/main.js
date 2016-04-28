@@ -21,7 +21,7 @@ var bust = require('..'),
 		cwd: 'C:/users/ult/',
 		base: 'C:/users/ult/test',
 		path: 'C:/users/ult/test/file2.js',
-		contents: Buffer.from([0x80]),
+		contents: new Buffer([0x80]), // `Buffer.from` is not supported in Node 0.10
 	}),
 	fileBustPath = bust._relativePath(file.cwd, file.path),
 	file2BustPath = bust._relativePath(file2.cwd, file2.path),
