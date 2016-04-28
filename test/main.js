@@ -17,10 +17,17 @@ var bust = require('..'),
 		path: 'C:/users/ult/test/file2.js',
 		contents: new Buffer(file2ContentStr),
 	}),
+	fileBinary = new gutil.File({
+		cwd: 'C:/users/ult/',
+		base: 'C:/users/ult/test',
+		path: 'C:/users/ult/test/file2.js',
+		contents: Buffer.from([0x80]),
+	}),
 	fileBustPath = bust._relativePath(file.cwd, file.path),
 	file2BustPath = bust._relativePath(file2.cwd, file2.path),
 	fileHash = bust._hash(file, bust._DEFAULT_OPTIONS),
-	file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS);
+	file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS),
+	fileBinaryHash = bust._hash(fileBinary, bust._DEFAULT_OPTIONS);
 
 require('should');
 
@@ -185,6 +192,10 @@ describe('Configuration options', function() {
 				done();
 			});
 			stream.end(file);
+		});
+
+		it('should hash binary files with algorithm name correctly', function() {
+			fileBinaryHash.should.equal('8d39dd7eef115ea6975446ef4082951f');
 		});
 
 		it('should emit an error when the hashing algorithm is not supported', function(done) {
