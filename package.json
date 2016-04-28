@@ -25,11 +25,11 @@
     "url": "https://github.com/UltCombo/gulp-buster.git"
   },
   "dependencies": {
-    "bluebird": "^2.3.2",
-    "gulp-util": "^3.0.1",
-    "lodash.defaults": "^2.4.1",
-    "object-assign": "^1.0.0",
-    "through": "^2.3.4"
+    "bluebird": "^3.3.5",
+    "gulp-util": "^3.0.7",
+    "lodash.defaults": "^4.0.1",
+    "object-assign": "^4.0.1",
+    "through": "^2.3.8"
   },
   "engines": {
     "node": ">= 0.10"
@@ -38,10 +38,11 @@
   "bugs": {
     "url": "https://github.com/UltCombo/gulp-buster/issues"
   },
+  "homepage": "https://github.com/UltCombo/gulp-buster",
   "devDependencies": {
-    "istanbul": "^0.3.2",
-    "mocha": "^2.0.0",
-    "should": "^4.0"
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "should": "^8.3.1"
   },
   "scripts": {
     "test": "mocha",

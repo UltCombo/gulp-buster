@@ -112,7 +112,7 @@ describe('Core', function() {
 			expectedObj[file2BustPath] = file2Hash;
 
 			JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
-			Buffer.isBuffer(newFile.contents).should.be.true;
+			Buffer.isBuffer(newFile.contents).should.be.true();
 			done();
 		});
 		stream.write(file);
@@ -188,7 +188,7 @@ describe('Configuration options', function() {
 		it('should accept a hashing algorithm name string', function(done) {
 			var stream = bust({ algo: 'sha1' });
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.be.a.String.with.lengthOf(40);
+				JSON.parse(newFile.contents.toString())[fileBustPath].should.be.a.String().with.lengthOf(40);
 				done();
 			});
 			stream.end(file);
@@ -209,7 +209,7 @@ describe('Configuration options', function() {
 		it('should accept a synchronous function', function(done) {
 			var stream = bust({
 					algo: function(file) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return file.contents.toString();
 					},
 				});
@@ -223,7 +223,7 @@ describe('Configuration options', function() {
 		it('should accept an asynchronous function', function(done) {
 			var stream = bust({
 					algo: function(file) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
 								fulfill(file.contents.toString());
@@ -294,7 +294,7 @@ describe('Configuration options', function() {
 			var suffix = '_suffix',
 				options = {
 					transform: function(hashes) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return [hashes[fileBustPath] + suffix];
 					},
 				},
@@ -310,7 +310,7 @@ describe('Configuration options', function() {
 			var suffix = '_suffix',
 				options = {
 					transform: function(hashes) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
 								fulfill([hashes[fileBustPath] + suffix]);
@@ -331,7 +331,7 @@ describe('Configuration options', function() {
 		it('should accept a synchronous function', function(done) {
 			var options = {
 					formatter: function(hashes) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return hashes[fileBustPath];
 					},
 				},
@@ -346,7 +346,7 @@ describe('Configuration options', function() {
 		it('should accept an asynchronous function', function(done) {
 			var options = {
 					formatter: function(hashes) {
-						(this === undefined).should.be.true;
+						(this === undefined).should.be.true();
 						return new bust._Promise(function(fulfill) {
 							setTimeout(function() {
 								fulfill(hashes[fileBustPath]);
