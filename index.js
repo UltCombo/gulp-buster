@@ -1,27 +1,27 @@
 'use strict';
 
-var crypto = require('crypto'),
-	path = require('path'),
-	through = require('through'),
-	assign = require('object-assign'),
-	defaults = require('lodash.defaults'),
-	gutil = require('gulp-util'),
-	Promise = require('bluebird'),
-	DEFAULT_OPTIONS = {
-		fileName: 'busters.json',
-		algo: 'md5',
-		length: 0,
-		transform: Object,
-		formatter: JSON.stringify,
-	},
-	OPTION_TYPES = {
-		fileName: ['String'],
-		algo: ['String', 'Function'],
-		length: ['Number'],
-		transform: ['Function'],
-		formatter: ['Function'],
-	},
-	hashesStore = {}; // options.fileName: { relativePath: hash }
+var crypto = require('crypto');
+var path = require('path');
+var through = require('through');
+var assign = require('object-assign');
+var defaults = require('lodash.defaults');
+var gutil = require('gulp-util');
+var Promise = require('bluebird');
+var DEFAULT_OPTIONS = {
+	fileName: 'busters.json',
+	algo: 'md5',
+	length: 0,
+	transform: Object,
+	formatter: JSON.stringify,
+};
+var OPTION_TYPES = {
+	fileName: ['String'],
+	algo: ['String', 'Function'],
+	length: ['Number'],
+	transform: ['Function'],
+	formatter: ['Function'],
+};
+var hashesStore = {}; // options.fileName: { relativePath: hash }
 
 function error(msg) {
 	return new gutil.PluginError('gulp-buster', msg);
@@ -56,7 +56,7 @@ function assignOptions(options) {
 
 	Object.keys(options).forEach(function(option) {
 		if (!OPTION_TYPES.hasOwnProperty(option)) throw error('Unsupported option: ' + option);
-		if (options[option] !== undefined && !~OPTION_TYPES[option].indexOf(getType(options[option]))) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
+		if (options[option] !== undefined && OPTION_TYPES[option].indexOf(getType(options[option])) === -1) throw error('`options.' + option + '` must be of type ' + OPTION_TYPES[option].join(' or '));
 	});
 
 	return defaults({}, options, DEFAULT_OPTIONS);

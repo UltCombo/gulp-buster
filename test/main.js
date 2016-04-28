@@ -1,35 +1,35 @@
 'use strict';
 
-var bust = require('..'),
-	assign = require('object-assign'),
-	gutil = require('gulp-util'),
-	fileContentStr = 'foo',
-	file2ContentStr = 'bar',
-	file = new gutil.File({
-		cwd: 'C:/users/ult/',
-		base: 'C:/users/ult/test',
-		path: 'C:/users/ult/test/file.js',
-		contents: new Buffer(fileContentStr),
-	}),
-	file2 = new gutil.File({
-		cwd: 'C:/users/ult/',
-		base: 'C:/users/ult/test',
-		path: 'C:/users/ult/test/file2.js',
-		contents: new Buffer(file2ContentStr),
-	}),
-	fileBinary = new gutil.File({
-		cwd: 'C:/users/ult/',
-		base: 'C:/users/ult/test',
-		path: 'C:/users/ult/test/file2.js',
-		contents: new Buffer([0x80]), // `Buffer.from` is not supported in Node 0.10
-	}),
-	fileBustPath = bust._relativePath(file.cwd, file.path),
-	file2BustPath = bust._relativePath(file2.cwd, file2.path),
-	fileHash = bust._hash(file, bust._DEFAULT_OPTIONS),
-	file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS),
-	fileBinaryHash = bust._hash(fileBinary, bust._DEFAULT_OPTIONS);
-
+var bust = require('..');
+var assign = require('object-assign');
+var gutil = require('gulp-util');
 require('should');
+
+var fileContentStr = 'foo';
+var file2ContentStr = 'bar';
+var file = new gutil.File({
+	cwd: 'C:/users/ult/',
+	base: 'C:/users/ult/test',
+	path: 'C:/users/ult/test/file.js',
+	contents: new Buffer(fileContentStr),
+});
+var file2 = new gutil.File({
+	cwd: 'C:/users/ult/',
+	base: 'C:/users/ult/test',
+	path: 'C:/users/ult/test/file2.js',
+	contents: new Buffer(file2ContentStr),
+});
+var fileBinary = new gutil.File({
+	cwd: 'C:/users/ult/',
+	base: 'C:/users/ult/test',
+	path: 'C:/users/ult/test/file2.js',
+	contents: new Buffer([0x80]), // `Buffer.from` is not supported in Node 0.10
+});
+var fileBustPath = bust._relativePath(file.cwd, file.path);
+var file2BustPath = bust._relativePath(file2.cwd, file2.path);
+var fileHash = bust._hash(file, bust._DEFAULT_OPTIONS);
+var file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS);
+var fileBinaryHash = bust._hash(fileBinary, bust._DEFAULT_OPTIONS);
 
 beforeEach(bust._reset);
 
@@ -120,9 +120,9 @@ describe('Core', function() {
 	});
 
 	it('should bust two files into different output files in different streams', function(done) {
-		var stream = bust('output1.json'),
-			stream2 = bust('output2.json'),
-			testedOutputs = 0;
+		var stream = bust('output1.json');
+		var stream2 = bust('output2.json');
+		var testedOutputs = 0;
 
 		stream.on('data', function(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
@@ -141,9 +141,9 @@ describe('Core', function() {
 	});
 
 	it('should bust two files into the same output file in different streams', function(done) {
-		var stream = bust('output.json'),
-			stream2 = bust('output.json'),
-			testedOutputs = 0;
+		var stream = bust('output.json');
+		var stream2 = bust('output.json');
+		var testedOutputs = 0;
 
 		function runAssertion(newFile) {
 			var obj = JSON.parse(newFile.contents.toString());
@@ -208,11 +208,11 @@ describe('Configuration options', function() {
 
 		it('should accept a synchronous function', function(done) {
 			var stream = bust({
-					algo: function(file) {
-						(this === undefined).should.be.true();
-						return file.contents.toString();
-					},
-				});
+				algo: function(file) {
+					(this === undefined).should.be.true();
+					return file.contents.toString();
+				},
+			});
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
 				done();
@@ -222,15 +222,15 @@ describe('Configuration options', function() {
 
 		it('should accept an asynchronous function', function(done) {
 			var stream = bust({
-					algo: function(file) {
-						(this === undefined).should.be.true();
-						return new bust._Promise(function(fulfill) {
-							setTimeout(function() {
-								fulfill(file.contents.toString());
-							}, 0);
-						});
-					},
-				});
+				algo: function(file) {
+					(this === undefined).should.be.true();
+					return new bust._Promise(function(fulfill) {
+						setTimeout(function() {
+							fulfill(file.contents.toString());
+						}, 0);
+					});
+				},
+			});
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
 				done();
@@ -249,10 +249,10 @@ describe('Configuration options', function() {
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
 			var stream = bust({
-					algo: function() {
-						return new bust._Promise.resolve();
-					},
-				});
+				algo: function() {
+					return new bust._Promise.resolve();
+				},
+			});
 			stream.on('error', function(err) {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
@@ -263,8 +263,8 @@ describe('Configuration options', function() {
 
 	describe('length', function() {
 		it('should return leading characters for positive values', function(done) {
-			var expectedLength = 6,
-				stream = bust({ length: expectedLength });
+			var expectedLength = 6;
+			var stream = bust({ length: expectedLength });
 
 			fileHash.length.should.be.greaterThan(expectedLength);
 
@@ -276,8 +276,8 @@ describe('Configuration options', function() {
 		});
 
 		it('should return trailing characters for negative values', function(done) {
-			var expectedLength = 6,
-				stream = bust({ length: -expectedLength });
+			var expectedLength = 6;
+			var stream = bust({ length: -expectedLength });
 
 			fileHash.length.should.be.greaterThan(expectedLength);
 
@@ -291,14 +291,14 @@ describe('Configuration options', function() {
 
 	describe('transform', function() {
 		it('should accept a synchronous function', function(done) {
-			var suffix = '_suffix',
-				options = {
-					transform: function(hashes) {
-						(this === undefined).should.be.true();
-						return [hashes[fileBustPath] + suffix];
-					},
+			var suffix = '_suffix';
+			var options = {
+				transform: function(hashes) {
+					(this === undefined).should.be.true();
+					return [hashes[fileBustPath] + suffix];
 				},
-				stream = bust(options);
+			};
+			var stream = bust(options);
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
 				done();
@@ -307,18 +307,18 @@ describe('Configuration options', function() {
 		});
 
 		it('should accept an asynchronous function', function(done) {
-			var suffix = '_suffix',
-				options = {
-					transform: function(hashes) {
-						(this === undefined).should.be.true();
-						return new bust._Promise(function(fulfill) {
-							setTimeout(function() {
-								fulfill([hashes[fileBustPath] + suffix]);
-							}, 0);
-						});
-					},
+			var suffix = '_suffix';
+			var options = {
+				transform: function(hashes) {
+					(this === undefined).should.be.true();
+					return new bust._Promise(function(fulfill) {
+						setTimeout(function() {
+							fulfill([hashes[fileBustPath] + suffix]);
+						}, 0);
+					});
 				},
-				stream = bust(options);
+			};
+			var stream = bust(options);
 			stream.on('data', function(newFile) {
 				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
 				done();
@@ -330,12 +330,12 @@ describe('Configuration options', function() {
 	describe('formatter', function() {
 		it('should accept a synchronous function', function(done) {
 			var options = {
-					formatter: function(hashes) {
-						(this === undefined).should.be.true();
-						return hashes[fileBustPath];
-					},
+				formatter: function(hashes) {
+					(this === undefined).should.be.true();
+					return hashes[fileBustPath];
 				},
-				stream = bust(options);
+			};
+			var stream = bust(options);
 			stream.on('data', function(newFile) {
 				newFile.contents.toString().should.equal(fileHash);
 				done();
@@ -345,16 +345,16 @@ describe('Configuration options', function() {
 
 		it('should accept an asynchronous function', function(done) {
 			var options = {
-					formatter: function(hashes) {
-						(this === undefined).should.be.true();
-						return new bust._Promise(function(fulfill) {
-							setTimeout(function() {
-								fulfill(hashes[fileBustPath]);
-							}, 0);
-						});
-					},
+				formatter: function(hashes) {
+					(this === undefined).should.be.true();
+					return new bust._Promise(function(fulfill) {
+						setTimeout(function() {
+							fulfill(hashes[fileBustPath]);
+						}, 0);
+					});
 				},
-				stream = bust(options);
+			};
+			var stream = bust(options);
 			stream.on('data', function(newFile) {
 				newFile.contents.toString().should.equal(fileHash);
 				done();
@@ -373,10 +373,10 @@ describe('Configuration options', function() {
 
 		it('should emit an error when promise is not fulfilled with a string', function(done) {
 			var stream = bust({
-					formatter: function() {
-						return new bust._Promise.resolve();
-					},
-				});
+				formatter: function() {
+					return new bust._Promise.resolve();
+				},
+			});
 			stream.on('error', function(err) {
 				err.should.be.an.instanceOf(gutil.PluginError);
 				done();
