@@ -8,6 +8,10 @@
 - Removed the undocumented experimental `mode` option, use the new `transform` option instead.
 - Removed the undocumented `hashes` method.
 
+### Patch releases
+
+- **1.0.1**: Fixed a bug in the crypto hashing logic that would give wrong hash results sometimes, mainly when hashing binary files. Also added official support for Node.js versions 0.12, 4, 5 and 6! (in addition to version 0.10 which was already supported)
+
 ### New features
 
 - Configuration options: added new `formatter` and `transform` options, added support for `algo` as a function and negative `length`. See the [docs](https://github.com/UltCombo/gulp-buster/#parameters) for details.
