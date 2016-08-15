@@ -45,7 +45,7 @@ function sliceHash(hash, options) {
 }
 
 function relativePath(projectPath, relativePath, filePath) {
-	return path.relative(projectPath + relativePath, filePath).replace(/\\/g, '/');
+	return path.relative(projectPath + '/' + relativePath, filePath).replace(/\\/g, '/');
 }
 
 function getType(value) {
