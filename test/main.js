@@ -25,11 +25,16 @@ var fileBinary = new gutil.File({
 	path: 'C:/users/ult/test/file2.js',
 	contents: new Buffer([0x80]), // `Buffer.from` is not supported in Node 0.10
 });
-var fileBustPath = bust._relativePath(file.cwd, file.path);
-var file2BustPath = bust._relativePath(file2.cwd, file2.path);
+var fileBustPath = bust._relativePath(file.cwd, '.', file.path);
+var fileBustPathRelative = bust._relativePath(file.cwd, 'test/', file.path);
+var file2BustPath = bust._relativePath(file2.cwd, '.', file2.path);
 var fileHash = bust._hash(file, bust._DEFAULT_OPTIONS);
 var file2Hash = bust._hash(file2, bust._DEFAULT_OPTIONS);
 var fileBinaryHash = bust._hash(fileBinary, bust._DEFAULT_OPTIONS);
+
+var parseFile = function(file) {
+	return JSON.parse(file.contents.toString());
+};
 
 beforeEach(bust._reset);
 
@@ -42,7 +47,7 @@ describe('Configuration-independent internal methods', function() {
 
 	describe('_relativePath()', function() {
 		it('should return a path relative to project root', function() {
-			bust._relativePath('/projectRoot/', '/projectRoot/folder/file.ext').should.equal('folder/file.ext');
+			bust._relativePath('/projectRoot/', '.', '/projectRoot/folder/file.ext').should.equal('folder/file.ext');
 		});
 	});
 
@@ -111,7 +116,7 @@ describe('Core', function() {
 			expectedObj[fileBustPath] = fileHash;
 			expectedObj[file2BustPath] = file2Hash;
 
-			JSON.parse(newFile.contents.toString()).should.eql(expectedObj);
+			parseFile(newFile).should.eql(expectedObj);
 			Buffer.isBuffer(newFile.contents).should.be.true();
 			done();
 		});
@@ -125,13 +130,13 @@ describe('Core', function() {
 		var testedOutputs = 0;
 
 		stream.on('data', function(newFile) {
-			var obj = JSON.parse(newFile.contents.toString());
+			var obj = parseFile(newFile);
 			obj.should.have.property(fileBustPath);
 			obj.should.not.have.property(file2BustPath);
 			if (++testedOutputs === 2) done();
 		});
 		stream2.on('data', function(newFile) {
-			var obj = JSON.parse(newFile.contents.toString());
+			var obj = parseFile(newFile);
 			obj.should.not.have.property(fileBustPath);
 			obj.should.have.property(file2BustPath);
 			if (++testedOutputs === 2) done();
@@ -146,7 +151,7 @@ describe('Core', function() {
 		var testedOutputs = 0;
 
 		function runAssertion(newFile) {
-			var obj = JSON.parse(newFile.contents.toString());
+			var obj = parseFile(newFile);
 			obj.should.have.property(fileBustPath);
 			obj.should.have.property(file2BustPath);
 			done();
@@ -163,7 +168,7 @@ describe('Core', function() {
 	it('should return an empty hashes object file when receiving an empty buffers stream', function(done) {
 		var stream = bust();
 		stream.on('data', function(newFile) {
-			JSON.parse(newFile.contents.toString()).should.eql({});
+			parseFile(newFile).should.eql({});
 			done();
 		});
 		stream.end();
@@ -188,7 +193,7 @@ describe('Configuration options', function() {
 		it('should accept a hashing algorithm name string', function(done) {
 			var stream = bust({ algo: 'sha1' });
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.be.a.String().with.lengthOf(40);
+				parseFile(newFile)[fileBustPath].should.be.a.String().with.lengthOf(40);
 				done();
 			});
 			stream.end(file);
@@ -214,7 +219,7 @@ describe('Configuration options', function() {
 				},
 			});
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
+				parseFile(newFile)[fileBustPath].should.equal(fileContentStr);
 				done();
 			});
 			stream.end(file);
@@ -232,7 +237,7 @@ describe('Configuration options', function() {
 				},
 			});
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileContentStr);
+				parseFile(newFile)[fileBustPath].should.equal(fileContentStr);
 				done();
 			});
 			stream.end(file);
@@ -269,7 +274,7 @@ describe('Configuration options', function() {
 			fileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileHash.slice(0, expectedLength));
+				parseFile(newFile)[fileBustPath].should.equal(fileHash.slice(0, expectedLength));
 				done();
 			});
 			stream.end(file);
@@ -282,7 +287,7 @@ describe('Configuration options', function() {
 			fileHash.length.should.be.greaterThan(expectedLength);
 
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[fileBustPath].should.equal(fileHash.slice(-expectedLength));
+				parseFile(newFile)[fileBustPath].should.equal(fileHash.slice(-expectedLength));
 				done();
 			});
 			stream.end(file);
@@ -300,7 +305,7 @@ describe('Configuration options', function() {
 			};
 			var stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
+				parseFile(newFile)[0].should.equal(fileHash + suffix);
 				done();
 			});
 			stream.end(file);
@@ -320,7 +325,7 @@ describe('Configuration options', function() {
 			};
 			var stream = bust(options);
 			stream.on('data', function(newFile) {
-				JSON.parse(newFile.contents.toString())[0].should.equal(fileHash + suffix);
+				parseFile(newFile)[0].should.equal(fileHash + suffix);
 				done();
 			});
 			stream.end(file);
@@ -379,6 +384,56 @@ describe('Configuration options', function() {
 			});
 			stream.on('error', function(err) {
 				err.should.be.an.instanceOf(gutil.PluginError);
+				done();
+			});
+			stream.end(file);
+		});
+	});
+
+	describe('relativePath', function() {
+		it('should not include this path in the hashes object', function(done) {
+			var options = {
+				relativePath: 'test/',
+			};
+			var stream = bust(options);
+			stream.on('data', function(newFile) {
+				parseFile(newFile).should.have.property(fileBustPathRelative);
+				done();
+			});
+			stream.end(file);
+		});
+
+		it('should accept a leading slash', function(done) {
+			var options = {
+				relativePath: '/test/',
+			};
+			var stream = bust(options);
+			stream.on('data', function(newFile) {
+				parseFile(newFile).should.have.property(fileBustPathRelative);
+				done();
+			});
+			stream.end(file);
+		});
+
+		it('should not require a trailing slash', function(done) {
+			var options = {
+				relativePath: 'test',
+			};
+			var stream = bust(options);
+			stream.on('data', function(newFile) {
+				parseFile(newFile).should.have.property(fileBustPathRelative);
+				done();
+			});
+			stream.end(file);
+		});
+
+		it('should accept just a slash', function(done) {
+			var options = {
+				relativePath: '/',
+			};
+			var stream = bust(options);
+			stream.on('data', function(newFile) {
+				parseFile(newFile).should.have.property(fileBustPath);
 				done();
 			});
 			stream.end(file);

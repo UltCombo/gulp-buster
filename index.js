@@ -13,6 +13,7 @@ var DEFAULT_OPTIONS = {
 	length: 0,
 	transform: Object,
 	formatter: JSON.stringify,
+	relativePath: '.',
 };
 var OPTION_TYPES = {
 	fileName: ['String'],
@@ -20,6 +21,7 @@ var OPTION_TYPES = {
 	length: ['Number'],
 	transform: ['Function'],
 	formatter: ['Function'],
+	relativePath: ['String'],
 };
 var hashesStore = {}; // options.fileName: { relativePath: hash }
 
@@ -42,8 +44,8 @@ function sliceHash(hash, options) {
 		: hash;
 }
 
-function relativePath(projectPath, filePath) {
-	return path.relative(projectPath, filePath).replace(/\\/g, '/');
+function relativePath(projectPath, relativePath, filePath) {
+	return path.relative(path.join(projectPath, relativePath), filePath).replace(/\\/g, '/');
 }
 
 function getType(value) {
@@ -75,7 +77,7 @@ module.exports = exports = function(options) {
 		hashingPromises.push(
 			Promise.try(hash.bind(undefined, file, options)).then(function(hashed) {
 				if (typeof hashed !== 'string') throw error('Return/fulfill value of `options.algo` must be a string');
-				hashes[relativePath(file.cwd, file.path)] = sliceHash(hashed, options);
+				hashes[relativePath(file.cwd, options.relativePath, file.path)] = sliceHash(hashed, options);
 			})
 		);
 	}

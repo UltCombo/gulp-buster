@@ -78,6 +78,8 @@ gulp.task('default', function() {
 
 - `options.formatter` (function, optional): the function responsible for serializing the hashes data structure into the string content of the output file. It takes the value returned from the `transform` function as the first argument and must return a string. Defaults to `JSON.stringify`.
 
+- `options.relativePath` (string, optional): the part of the path, relative to the project root, that should be omitted from the hashes object. Defaults to the project root—more specifically `process.cwd`. gulp defaults the `process.cwd` to where the gulpfile is located.
+
 **Note:** all of the options which accept a function can be run asynchronously by returning a promise (or *thenable*). If the given option has a return value constraint, the constraint will still be applied to the promise's fulfillment value.
 
 ## Integrating with Web applications
