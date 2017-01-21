@@ -438,5 +438,30 @@ describe('Configuration options', function() {
 			});
 			stream.end(file);
 		});
+
+		it('should ignore files with `null` content', function (done) {
+			var stream = bust();
+			var nullFile = file.clone();
+			nullFile.contents = null;
+			nullFile.isNull().should.be.true;
+			stream.on('data', function(newFile) {
+				parseFile(newFile).should.deepEqual({});
+				done();
+			});
+			stream.end(nullFile);
+		});
+
+		it('should throw a not supported error upon receiving a vinyl file with a stream as content', function(done) {
+			var bustStream = bust();
+			var Readable = require('stream').Readable;
+			var readableStream = new Readable();
+			var vinylFileWithStreamContent = file.clone();
+			vinylFileWithStreamContent.contents = readableStream;
+			vinylFileWithStreamContent.isStream().should.be.true;
+
+			(function() {bustStream.end(vinylFileWithStreamContent);}).should.throw('Streaming not supported');
+
+			done();
+		})
 	});
 });

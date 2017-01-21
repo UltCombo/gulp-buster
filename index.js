@@ -71,14 +71,11 @@ module.exports = exports = function(options) {
 
 	function hashFile(file, enc, cb) {
 		if (file.isNull()) {
-			cb();
-			return;
+			return cb();
 		}
 
 		if (file.isStream()) {
-			this.emit('error', error('Streaming not supported'));
-			cb();
-			return;
+			return cb(error('Streaming not supported'));
 		}
 
 		// start hashing files as soon as they are received for maximum concurrency
@@ -107,7 +104,7 @@ module.exports = exports = function(options) {
 		}).catch(function(err) {
 			this.emit('error', err instanceof gutil.PluginError ? err : error(err));
 		})
-			.finally(cb);
+		.finally(cb);
 	}
 
 	return through.obj(hashFile, endStream);
