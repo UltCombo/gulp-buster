@@ -2,7 +2,7 @@
 
 var crypto = require('crypto');
 var path = require('path');
-var through = require('through');
+var through = require('through2');
 var assign = require('object-assign');
 var defaults = require('lodash.defaults');
 var gutil = require('gulp-util');
@@ -69,9 +69,14 @@ module.exports = exports = function(options) {
 	var hashes = hashesStore[options.fileName] = hashesStore[options.fileName] || {},
 		hashingPromises = [];
 
-	function hashFile(file) {
-		if (file.isNull()) return; // ignore
-		if (file.isStream()) return this.emit('error', error('Streaming not supported'));
+	function hashFile(file, enc, cb) {
+		if (file.isNull()) {
+			return cb();
+		}
+
+		if (file.isStream()) {
+			return cb(error('Streaming not supported'));
+		}
 
 		// start hashing files as soon as they are received for maximum concurrency
 		hashingPromises.push(
@@ -80,27 +85,29 @@ module.exports = exports = function(options) {
 				hashes[relativePath(file.cwd, options.relativePath, file.path)] = sliceHash(hashed, options);
 			})
 		);
+
+		cb();
 	}
 
-	function endStream() {
+	function endStream(cb) {
+
 		Promise.all(hashingPromises).bind(this).then(function() {
 			return options.transform.call(undefined, assign({}, hashes));
 		}).then(function(transformed) {
 			return options.formatter.call(undefined, transformed);
 		}).then(function(formatted) {
 			if (typeof formatted !== 'string') throw error('Return/fulfill value of `options.formatter` must be a string');
-
-			this.emit('data', new gutil.File({
+			this.push(new gutil.File({
 				path: path.join(process.cwd(), options.fileName),
 				contents: new Buffer(formatted),
 			}));
-			this.emit('end');
 		}).catch(function(err) {
 			this.emit('error', err instanceof gutil.PluginError ? err : error(err));
-		});
+		})
+		.finally(cb);
 	}
 
-	return through(hashFile, endStream);
+	return through.obj(hashFile, endStream);
 };
 
 // for testing. Don't use, may be removed or changed at anytime
