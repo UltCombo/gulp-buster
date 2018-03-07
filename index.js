@@ -5,7 +5,8 @@ var path = require('path');
 var through = require('through');
 var assign = require('object-assign');
 var defaults = require('lodash.defaults');
-var gutil = require('gulp-util');
+var Vinyl = require('vinyl');
+var PluginError = require('plugin-error');
 var Promise = require('bluebird');
 var DEFAULT_OPTIONS = {
 	fileName: 'busters.json',
@@ -26,7 +27,7 @@ var OPTION_TYPES = {
 var hashesStore = {}; // options.fileName: { relativePath: hash }
 
 function error(msg) {
-	return new gutil.PluginError('gulp-buster', msg);
+	return new PluginError('gulp-buster', msg);
 }
 
 function hash(file, options) {
@@ -90,13 +91,13 @@ module.exports = exports = function(options) {
 		}).then(function(formatted) {
 			if (typeof formatted !== 'string') throw error('Return/fulfill value of `options.formatter` must be a string');
 
-			this.emit('data', new gutil.File({
+			this.emit('data', new Vinyl({
 				path: path.join(process.cwd(), options.fileName),
 				contents: new Buffer(formatted),
 			}));
 			this.emit('end');
 		}).catch(function(err) {
-			this.emit('error', err instanceof gutil.PluginError ? err : error(err));
+			this.emit('error', err instanceof PluginError ? err : error(err));
 		});
 	}
 
