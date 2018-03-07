@@ -2,29 +2,30 @@
 
 var bust = require('..');
 var assign = require('object-assign');
-var gutil = require('gulp-util');
+var Vinyl = require('vinyl');
 require('should');
 
 var fileContentStr = 'foo';
 var file2ContentStr = 'bar';
-var file = new gutil.File({
+var file = new Vinyl({
 	cwd: 'C:/users/ult/',
 	base: 'C:/users/ult/test',
 	path: 'C:/users/ult/test/file.js',
 	contents: new Buffer(fileContentStr),
 });
-var file2 = new gutil.File({
+var file2 = new Vinyl({
 	cwd: 'C:/users/ult/',
 	base: 'C:/users/ult/test',
 	path: 'C:/users/ult/test/file2.js',
 	contents: new Buffer(file2ContentStr),
 });
-var fileBinary = new gutil.File({
+var fileBinary = new Vinyl({
 	cwd: 'C:/users/ult/',
 	base: 'C:/users/ult/test',
 	path: 'C:/users/ult/test/file2.js',
 	contents: new Buffer([0x80]), // `Buffer.from` is not supported in Node 0.10
 });
+var PluginError = require('plugin-error');
 var fileBustPath = bust._relativePath(file.cwd, '.', file.path);
 var fileBustPathRelative = bust._relativePath(file.cwd, 'test/', file.path);
 var file2BustPath = bust._relativePath(file2.cwd, '.', file2.path);
@@ -41,7 +42,7 @@ beforeEach(bust._reset);
 describe('Configuration-independent internal methods', function() {
 	describe('_error()', function() {
 		it('should return an instance of PluginError', function() {
-			bust._error('err').should.be.an.instanceOf(gutil.PluginError);
+			bust._error('err').should.be.an.instanceOf(PluginError);
 		});
 	});
 
@@ -106,7 +107,7 @@ describe('Core', function() {
 	it('should bust two files into the same output file in the same stream', function(done) {
 		var stream = bust();
 		stream.on('data', function(newFile) {
-			newFile.should.be.an.instanceOf(gutil.File);
+			newFile.should.be.an.instanceOf(Vinyl);
 			newFile.should.have.property('path');
 			newFile.should.have.property('relative');
 			newFile.should.have.property('contents');
@@ -246,7 +247,7 @@ describe('Configuration options', function() {
 		it('should emit an error when function does not return a string or promise', function(done) {
 			var stream = bust({ algo: function() {} });
 			stream.on('error', function(err) {
-				err.should.be.an.instanceOf(gutil.PluginError);
+				err.should.be.an.instanceOf(PluginError);
 				done();
 			});
 			stream.end(file);
@@ -259,7 +260,7 @@ describe('Configuration options', function() {
 				},
 			});
 			stream.on('error', function(err) {
-				err.should.be.an.instanceOf(gutil.PluginError);
+				err.should.be.an.instanceOf(PluginError);
 				done();
 			});
 			stream.end(file);
@@ -370,7 +371,7 @@ describe('Configuration options', function() {
 		it('should emit an error when function does not return a string or promise', function(done) {
 			var stream = bust({ formatter: function() {} });
 			stream.on('error', function(err) {
-				err.should.be.an.instanceOf(gutil.PluginError);
+				err.should.be.an.instanceOf(PluginError);
 				done();
 			});
 			stream.end(file);
@@ -383,7 +384,7 @@ describe('Configuration options', function() {
 				},
 			});
 			stream.on('error', function(err) {
-				err.should.be.an.instanceOf(gutil.PluginError);
+				err.should.be.an.instanceOf(PluginError);
 				done();
 			});
 			stream.end(file);
